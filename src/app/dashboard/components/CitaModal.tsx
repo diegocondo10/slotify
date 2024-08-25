@@ -26,7 +26,7 @@ import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { useQuery } from "react-query";
 
-const CitaModal = forwardRef<any, any>((props, ref) => {
+const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
   const [visible, setVisible] = useState(false);
   const [estadosIndexed, setEstadosIndexed] = useState<Record<string, any>>({});
   const [title, setTitle] = useState("Nueva Cita");
@@ -120,6 +120,8 @@ const CitaModal = forwardRef<any, any>((props, ref) => {
       formData.horaFin = formatToTimeString(formData.horaFin);
 
       await mutation.submitForm(formData);
+      setVisible(false);
+      await onComplete();
     } catch (error) {
       console.log(error);
     }
@@ -138,12 +140,19 @@ const CitaModal = forwardRef<any, any>((props, ref) => {
           header={title}
           footer={
             <div className='w-full flex flex-row justify-content-around'>
-              <Button variant='info' label='Regresar' className='w-10rem' onClick={onHide} />
+              <Button
+                variant='info'
+                label='Regresar'
+                className='w-10rem'
+                onClick={onHide}
+                loading={isLoading}
+              />
               <Button
                 label='Guardar'
                 className='w-10rem'
                 type='submit'
                 onClick={methods.handleSubmit(onSubmit)}
+                loading={isLoading}
               />
             </div>
           }>

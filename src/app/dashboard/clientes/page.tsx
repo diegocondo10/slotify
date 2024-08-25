@@ -23,7 +23,7 @@ export default function ClientesPage() {
   return (
     <div className='grid grid-nogutter'>
       <div className='col-12'>
-        <PageTitle>Clientes</PageTitle>
+        <PageTitle>Pacientes</PageTitle>
       </div>
       <div className='col-12'>
         <PaginatedTable

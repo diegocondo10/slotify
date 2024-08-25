@@ -1,10 +1,12 @@
 "use client";
 
 import { CitaService } from "@/services/citas/citas.service";
+import { formatToTimeString, toBackDate } from "@/utils/date";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
 import { isEqual } from "date-fns";
+import { ProgressSpinner } from "primereact/progressspinner";
 import { useRef, useState } from "react";
 import { useQuery } from "react-query";
 import CitaModal from "./components/CitaModal";
@@ -20,9 +22,6 @@ const DashboardPage = () => {
     () => new CitaService().listByRange(currentRange.start, currentRange.end),
     {
       enabled: !!currentRange.start && !!currentRange.end, // Solo habilitar cuando hay un rango definido
-      onSuccess(data) {
-        console.log(data);
-      },
     }
   );
 
@@ -30,8 +29,13 @@ const DashboardPage = () => {
     dialogRef.current.editar(info.event.id);
   };
 
-  const handleEventDrop = (info: any): void => {
-    console.log(`Evento "${info.event.title}" movido a ${info.event.start}`);
+  const handleEventDrop = async (info: any): Promise<void> => {
+    await new CitaService().reagendar(info.event.id, {
+      fecha: toBackDate(info.event.start),
+      horaInicio: formatToTimeString(info.event.start),
+      horaFin: formatToTimeString(info.event.end),
+    });
+    queryCitas.refetch();
   };
 
   const handleSlotClick = (info) => {
@@ -50,7 +54,21 @@ const DashboardPage = () => {
 
   return (
     <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
-      <CitaModal ref={dialogRef} />
+      {/* Mostrar el spinner de carga cuando los datos se están cargando */}
+      {queryCitas.isFetching && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 1000,
+          }}>
+          <ProgressSpinner />
+          <p className='font-bold text-xl'>Buscando...</p>
+        </div>
+      )}
+      <CitaModal ref={dialogRef} onComplete={() => queryCitas.refetch()} />
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView='timeGridWeek' // Vista inicial en el calendario
@@ -93,6 +111,7 @@ const DashboardPage = () => {
         expandRows={true} // Asegura que las filas se expandan para ocupar el espacio disponible
         snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
         datesSet={handleDatesSet} // Manejador para capturar la fecha visible actual
+        // eventResizeStop={handleEventDrop}
       />
     </div>
   );

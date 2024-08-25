@@ -23,6 +23,7 @@ export const authOptions: NextAuthOptions = {
           return {
             accessToken: data.access,
             refreshToken: data.refresh,
+            perfil: data.profile,
             ...data.profile,
           };
         } catch (error) {
@@ -41,6 +42,8 @@ export const authOptions: NextAuthOptions = {
         token.refreshToken = user.refreshToken;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
+        //@ts-ignore
+        token.perfil = user.perfil;
       }
       return token;
     },
@@ -48,10 +51,10 @@ export const authOptions: NextAuthOptions = {
       session.accessToken = token.accessToken as string;
 
       session.refreshToken = token.refreshToken as string;
-
-      const perfil = await new AuthService({ token: session.accessToken }).perfil();
-
-      session.user = perfil;
+      // console.log(token);
+      // const perfil = await new AuthService({ token: session.accessToken }).perfil();
+      //@ts-ignore
+      session.user = token.perfil;
 
       return session;
     },

@@ -59,7 +59,7 @@ const Navbar = () => {
             command: lazyPush(router, "/dashboard"),
           },
           {
-            label: "Clientes",
+            label: "Pacientes",
             command: lazyPush(router, "/dashboard/clientes"),
           },
         ]}

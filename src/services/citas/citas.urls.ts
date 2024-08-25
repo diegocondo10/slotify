@@ -3,6 +3,7 @@ import { BaseURLs } from "../types";
 
 export interface CitaUrls extends BaseURLs {
   listByRange: (start: string, end: string) => string;
+  reagendar: (id: PK) => string;
 }
 
 export const CITAS_URLS: CitaUrls = {
@@ -12,4 +13,5 @@ export const CITAS_URLS: CitaUrls = {
   retrieve: (id: PK) => `citas/${id}/`,
   update: (id: PK) => `citas/${id}/`,
   listByRange: (start: string, end: string) => `citas/list-by-range/${start}/${end}/`,
+  reagendar: (id: PK) => `citas/${id}/reagendar/`,
 };
