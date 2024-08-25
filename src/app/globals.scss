@@ -5,10 +5,10 @@
 @import "~primereact/resources/primereact.min.css";
 
 @import "~primereact/resources/themes/mdc-light-deeppurple/theme.css";
-// @import "~react-datepicker/dist/react-datepicker.css";
+@import "~react-datepicker/dist/react-datepicker.css";
 @import "~ckeditor5/ckeditor5.css";
 @import "~react-big-calendar/lib/css/react-big-calendar.css";
-
+@import 'styles/overrides/index.scss';
 @import "styles/typography.scss";
 // @tailwind base;
 // @tailwind components;
@@ -35,22 +35,37 @@ body {
   height: 100%;
 }
 
-// @layer utilities {
-//   .text-balance {
-//     text-wrap: balance;
-//   }
-// }
-// .rbc-day-slot.rbc-time-column {
-//   min-width: 10rem;
-// }
-// .rbc-header {
-//   min-width: 10rem;
-// }
-// .rbc-day-bg {
-//   min-width: 10rem;
-// }
-.prueba1 {
-  background-color: red !important;
-  border: 1px solid red !important;
+.rbc-header > * {
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  font-size: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 2rem;
+}
+
+.rbc-toolbar-label {
   font-weight: bold;
+  text-transform: uppercase;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.rbc-events-container {
+  cursor: pointer;
+}
+
+.rbc-day-bg {
+  cursor: pointer;
+}
+
+.rbc-row-content {
+  cursor: pointer;
+}
+
+.rbc-event-label {
+  display: none;
+}
+
+.rbc-allday-cell {
+  display: none;
 }

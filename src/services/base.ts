@@ -1,7 +1,7 @@
 import { PK, ReportResponse } from "@/types/api";
 import { AxiosInstance, AxiosResponse, isAxiosError, Method } from "axios";
 import { getSession } from "next-auth/react";
-import API from "./api";
+import { createApi } from "./api";
 import { ApiException } from "./exceptions";
 import { BaseURLs, InstanceServiceProps } from "./types";
 
@@ -11,8 +11,8 @@ export abstract class BaseService<T extends BaseURLs> {
   public urls: T;
 
   constructor(props: InstanceServiceProps = null) {
-    this._privateApi = API;
-    this._publicApi = API;
+    this._privateApi = createApi();
+    this._publicApi = createApi();
 
     this.urls = this.getUrls();
 
@@ -113,7 +113,7 @@ export abstract class BaseService<T extends BaseURLs> {
   }
 
   async retrieve(id: PK): Promise<AxiosResponse> {
-    return this.request("get", this.urls.retrieve(id), undefined, (status) => status === 200);
+    return await this.request("get", this.urls.retrieve(id), undefined, (status) => status === 200);
   }
 
   protected handleError(error: any): never {

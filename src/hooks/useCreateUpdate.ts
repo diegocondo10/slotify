@@ -1,5 +1,5 @@
 import { CrudActions } from "@/emuns/crudActions";
-import { BaseException } from "@/services/service.exceptions";
+import { BaseException } from "@/services/exceptions";
 import { AxiosResponse } from "axios";
 import has from "lodash/has";
 import React, { useMemo } from "react";
@@ -73,6 +73,7 @@ const useCreateUpdate = <T>({
           if (has(methods.control._fields, item.name)) {
             methods.setError(item.name, item.props);
           } else if (item.props.message) {
+            console.log("NO FORM FIELD: ", item.name);
             toastMessages.push(item.props.message);
           }
         });
@@ -86,14 +87,13 @@ const useCreateUpdate = <T>({
           });
           toasts.addErrorToast(errorMessages);
         } else {
-          toasts.addWarningToast("Algo ha salido mal, revisa la información ingresada");
+          toasts.addErrorToast("Algo ha salido mal, revisa la información ingresada");
         }
         return;
       }
       toasts.addErrorToast(
         error?.message || "Ha ocurrido un problema al momento de procesar tu petición"
       );
-      console.log("ERROR: ", error);
     }
   };
 

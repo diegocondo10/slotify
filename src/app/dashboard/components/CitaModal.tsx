@@ -1,0 +1,292 @@
+import Button from "@/components/Buttons/Button";
+import DateInput from "@/components/Forms/DateInput";
+import DropDown from "@/components/Forms/DropDown";
+import FormFieldRender from "@/components/Forms/FormFieldRender";
+import TextArea from "@/components/Forms/TextArea";
+import TimePicker from "@/components/Forms/TimePicker";
+import Loading from "@/components/Loading";
+import { EstadoCitaService } from "@/services/citas/estadoCita.service";
+import { ClienteService } from "@/services/clientes/clientes.service";
+import classNames from "classnames";
+import { addMonths } from "date-fns";
+import { addHours } from "date-fns/addHours";
+import { subDays } from "date-fns/subDays";
+import { PrimeIcons } from "primereact/api";
+import { Dialog } from "primereact/dialog";
+import { Tag } from "primereact/tag";
+import { Tooltip } from "primereact/tooltip";
+import { forwardRef, useImperativeHandle, useState } from "react";
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
+import { useQuery } from "react-query";
+
+const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
+  const [visible, setVisible] = useState(true);
+  const [title, setTitle] = useState("Nueva Cita");
+  const methods = useForm({ mode: "onChange" });
+
+  const queryEstados = useQuery(
+    ["estados_citas", visible],
+    () => new EstadoCitaService().listAsLabelValue(),
+    {
+      enabled: visible,
+    }
+  );
+
+  const queryClientes = useQuery(["clientes_list_label_value"], () =>
+    new ClienteService().listAsLabelValue()
+  );
+
+  const isLoading = queryEstados.isFetching || queryClientes.isFetching;
+
+  const horaInicio = useWatch({
+    name: "horaInicio",
+    control: methods.control,
+  });
+
+  const estado = useWatch({
+    name: "estado",
+    control: methods.control,
+  });
+
+  const onSubmit = (formData) => {
+    try {
+      const horaInicio = formData.horaInicio;
+      const horaFin = formData.horaFin;
+      const fecha = formData.fecha;
+
+      horaInicio.setDate(fecha.getDate());
+
+      horaFin.setDate(fecha.getDate());
+
+      onComplete({
+        title: `Evento `,
+        start: horaInicio,
+        end: horaFin,
+        resource: {
+          message: "Este es un evento",
+        },
+      });
+      setVisible(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onHide = () => {
+    setVisible(false);
+  };
+
+  useImperativeHandle(ref, () => ({
+    agregar: ({ date }) => {
+      setTitle("Agregar Cita");
+      setVisible(true);
+      methods.reset({
+        fecha: date,
+        horaInicio: date,
+        horaFin: addHours(date, 1),
+      });
+    },
+    editar: ({ date }) => {
+      setTitle("Editar Cita");
+      setVisible(true);
+      methods.reset({
+        fecha: date,
+        horaInicio: date,
+      });
+    },
+  }));
+
+  return (
+    <FormProvider {...methods}>
+      {visible && (
+        <Dialog
+          visible={visible}
+          onHide={onHide}
+          draggable={false}
+          breakpoints={{ "0px": "100vw", "641px": "80vw", "999999px": "75vw" }}
+          contentStyle={{
+            minHeight: "35rem",
+          }}
+          header={title}
+          footer={
+            <div className='w-full flex flex-row justify-content-around'>
+              <Button variant='info' label='Regresar' className='w-10rem' onClick={onHide} />
+              <Button
+                label='Guardar'
+                className='w-10rem'
+                type='submit'
+                onClick={methods.handleSubmit(onSubmit)}
+              />
+            </div>
+          }>
+          <Loading loading={isLoading}>
+            <div className='w-full grid grid-nogutter'>
+              <div className='field col-12'>
+                <FormFieldRender
+                  label='Paciente'
+                  name='paciente'
+                  render={({ name }) => (
+                    <DropDown
+                      controller={{
+                        name,
+                        rules: {
+                          required: "Este campo es obligatorio",
+                        },
+                      }}
+                      block
+                      filter
+                      showFilterClear
+                      emptyFilterMessage={
+                        <Button
+                          block
+                          icon={PrimeIcons.PLUS}
+                          label='Agregar nuevo cliente'
+                          href='/dashboard/clientes/agregar'
+                        />
+                      }
+                      options={queryClientes.data}
+                    />
+                  )}
+                />
+              </div>
+
+              <div className='field col-12'>
+                <FormFieldRender
+                  name='estado'
+                  label={
+                    <div className='flex flex-row my-1'>
+                      <div className=' py-1'>Estado: </div>
+                      {estado && (
+                        <Tag
+                          className='ml-2'
+                          style={{
+                            backgroundColor: estado.color,
+                            color: estado.colorLetra,
+                          }}>
+                          {estado.label}
+                        </Tag>
+                      )}
+                    </div>
+                  }
+                  render={({ name }) => (
+                    <Controller
+                      name={name}
+                      rules={{
+                        required: "Este campo es obligatorio",
+                      }}
+                      render={({ field }) => (
+                        <div className='flex flex-row w-full'>
+                          {queryEstados.data?.map((item) => (
+                            <div
+                              role='button'
+                              key={item.value.codigo}
+                              className={classNames(
+                                "border-1 border-gray-500 border-round text-center flex flex-column justify-content-center mx-1 font-bold cursor-pointer",
+                                `estado-id-${item.value.codigo}`
+                              )}
+                              style={{
+                                width: "3rem",
+                                height: "3rem",
+                                backgroundColor: item.value.color,
+                                color: item.value.colorLetra,
+                              }}
+                              data-pr-tooltip={item.label}
+                              data-pr-position='right'
+                              data-pr-at='right+5 top'
+                              data-pr-my='left center-2'
+                              onClick={() => field.onChange(item.value)}>
+                              <Tooltip target={`.estado-id-${item.value.codigo}`} />
+                              {item.value.codigo}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    />
+                  )}
+                />
+              </div>
+
+              <div className='col-12 grid grid-nogutter justify-content-between'>
+                <div className='field col-12 sm:col-4 md:col-3 lg:col-3'>
+                  <FormFieldRender
+                    label='Fecha:'
+                    name='fecha'
+                    render={({ name }) => (
+                      <DateInput
+                        controller={{
+                          name,
+                          rules: {
+                            required: "Este campo es obligatorio",
+                          },
+                        }}
+                        minDate={subDays(new Date(), 10)}
+                        block
+                        maxDate={addMonths(new Date(), 3)}
+                      />
+                    )}
+                  />
+                </div>
+                <div className='field col-5 sm:col-4 md:col-3 lg:col-3'>
+                  <FormFieldRender
+                    label='Hora inicio:'
+                    name='horaInicio'
+                    render={({ name }) => (
+                      <TimePicker
+                        controller={{
+                          name,
+                          rules: {
+                            required: "Este campo es obligatorio",
+                            onChange: (evt) => {
+                              console.log("ON CHANGE: ", evt?.target?.value);
+                            },
+                          },
+                        }}
+                        block
+                        datePicker={{
+                          placeholderText: "SELECCIONE...",
+                          timeIntervals: 60,
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className='field col-5 sm:col-4 md:col-3 lg:col-3'>
+                  <FormFieldRender
+                    label='Hora fin:'
+                    name='horaFin'
+                    render={({ name }) => (
+                      <TimePicker
+                        controller={{
+                          name,
+                          rules: {
+                            required: "Este campo es obligatorio",
+                            min: {
+                              value: horaInicio,
+                              message: "La hora de fin debe ser mayor a la hora de inicio",
+                            },
+                          },
+                        }}
+                        block
+                        datePicker={{
+                          placeholderText: "SELECCIONE...",
+                          disabled: !!!horaInicio,
+                          timeIntervals: 60,
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+              <div className='field col-12'>
+                <label htmlFor='notas'>Notas:</label>
+                <TextArea controller={{ name: "notas" }} block rows={5} />
+              </div>
+            </div>
+          </Loading>
+        </Dialog>
+      )}
+    </FormProvider>
+  );
+});
+
+export default CitaModal;

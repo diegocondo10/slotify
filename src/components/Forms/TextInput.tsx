@@ -23,7 +23,6 @@ const TextInput: React.FC<TextInputProps> = (props) => {
           {...rest}
           invalid={fieldState.invalid}
           className={classNames(rest.className, {
-            "p-invalid": fieldState.invalid,
             "w-full": block,
           })}
           {...field}

@@ -1,9 +1,10 @@
 import ClientSessionProvider from "@/components/ClientSessionProvider";
 import { authOptions } from "@/constants/auth";
+import LocaleContext from "@/context/LocaleContext";
+import QueryClientContextProvider from "@/context/QueryClientContextProvider";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import "./globals.scss";
-import LocaleContext from "@/context/LocaleContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,9 +21,11 @@ export default async function RootLayout({
     <html lang='en' style={{ fontSize: "0.9rem" }}>
       <head></head>
       <body>
-        <LocaleContext>
-          <ClientSessionProvider session={session}>{children}</ClientSessionProvider>
-        </LocaleContext>
+        <QueryClientContextProvider>
+          <LocaleContext>
+            <ClientSessionProvider session={session}>{children}</ClientSessionProvider>
+          </LocaleContext>
+        </QueryClientContextProvider>
       </body>
     </html>
   );

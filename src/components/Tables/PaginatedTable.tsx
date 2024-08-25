@@ -1,6 +1,6 @@
-import { Column, ColumnProps } from 'primereact/column';
-import { DataTable, DataTableBaseProps, DataTableValueArray } from 'primereact/datatable';
-import { PropsWithChildren, PropsWithRef, forwardRef } from 'react';
+import { Column, ColumnProps } from "primereact/column";
+import { DataTable, DataTableBaseProps, DataTableValueArray } from "primereact/datatable";
+import { PropsWithChildren, PropsWithRef, forwardRef } from "react";
 
 export interface PaginatedTableProps<TValue extends DataTableValueArray>
   extends PropsWithRef<PropsWithChildren<DataTableBaseProps<TValue>>> {
@@ -13,15 +13,16 @@ const defaultProps: Partial<PaginatedTableProps<any>> = {
   paginator: true,
   stripedRows: true,
   showGridlines: true,
-  currentPageReportTemplate: '{currentPage} de {totalPages} | Registros totales {totalRecords}',
-  paginatorTemplate: 'FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink',
-  sortMode: 'multiple',
-  emptyMessage: 'No se ha encontrado información',
+  currentPageReportTemplate: "{currentPage} de {totalPages} | Registros totales {totalRecords}",
+  paginatorTemplate: "FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
+  sortMode: "multiple",
+  emptyMessage: "No se ha encontrado información",
   lazy: true,
   removableSort: true,
-  responsiveLayout: 'scroll',
-  filterDisplay: 'row',
+  responsiveLayout: "scroll",
+  filterDisplay: "row",
   showIndexColumn: true,
+  size: "small",
 };
 
 const PaginatedTable = forwardRef<DataTable<any>, PaginatedTableProps<any>>((props, ref) => {
@@ -34,8 +35,8 @@ const PaginatedTable = forwardRef<DataTable<any>, PaginatedTableProps<any>>((pro
     <DataTable ref={ref} {...dataTableProps}>
       {showIndexColumn && (
         <Column
-          header="#"
-          className="text-center font-bold"
+          header='#'
+          className='text-center font-bold'
           body={(rowData, options) => options.rowIndex + 1}
           {...indexColumnProps}
         />
@@ -45,6 +46,6 @@ const PaginatedTable = forwardRef<DataTable<any>, PaginatedTableProps<any>>((pro
   );
 });
 
-PaginatedTable.displayName = 'PaginatedTable';
+PaginatedTable.displayName = "PaginatedTable";
 
 export default PaginatedTable;

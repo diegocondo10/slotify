@@ -1,7 +1,9 @@
 "use client";
 import Button from "@/components/Buttons/Button";
+import { commandPush, lazyPush } from "@/utils/router";
 import classNames from "classnames";
 import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { Menubar } from "primereact/menubar";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -10,6 +12,9 @@ import { useRef } from "react";
 const Navbar = () => {
   const session = useSession({ required: true });
   const op = useRef<OverlayPanel>(null);
+
+  const router = useRouter();
+
   const end = () => (
     <>
       <Button
@@ -50,7 +55,12 @@ const Navbar = () => {
       <Menubar
         model={[
           {
+            label: "Inicio",
+            command: lazyPush(router, "/dashboard"),
+          },
+          {
             label: "Clientes",
+            command: lazyPush(router, "/dashboard/clientes"),
           },
         ]}
         end={end}

@@ -1,12 +1,14 @@
 "use client";
-import { useEffect } from "react";
-import { registerLocale, setDefaultLocale } from "react-datepicker";
-
+import Loading from "@/components/Loading";
 import { setDefaultOptions } from "date-fns";
 import { es } from "date-fns/locale";
 import { addLocale } from "primereact/api";
+import { useEffect, useState } from "react";
+import { registerLocale, setDefaultLocale } from "react-datepicker";
 
 const LocaleContext = ({ children }) => {
+  const [localeLoaded, setLocaleLoaded] = useState(false);
+
   useEffect(() => {
     registerLocale("es", es);
     setDefaultLocale("es");
@@ -50,7 +52,13 @@ const LocaleContext = ({ children }) => {
       clear: "Limpiar",
       apply: "Aplicar",
     });
+
+    setLocaleLoaded(true);
   }, []);
+
+  if (!localeLoaded) {
+    return <Loading loading />;
+  }
 
   return children;
 };

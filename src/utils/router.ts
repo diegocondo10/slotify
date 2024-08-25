@@ -1,15 +1,16 @@
-import { Url } from "next/dist/shared/lib/router/router";
-import Router from "next/router";
+import {
+  AppRouterInstance,
+  NavigateOptions,
+} from "next/dist/shared/lib/app-router-context.shared-runtime";
 
-interface TransitionOptions {
-  shallow?: boolean;
-  locale?: string | false;
-  scroll?: boolean;
-  unstable_skipClientCache?: boolean;
-}
+export const commandPush = (url: string) => {
+  return () => {
+    // return router.push(url);
+  };
+};
 
-export const commandPush = (url: Url, as?: Url, options?: TransitionOptions) => {
-  return async (): Promise<boolean> => {
-    return Router.push(url, as, options);
+export const lazyPush = (router: AppRouterInstance, href: string, options?: NavigateOptions) => {
+  return () => {
+    router.push(href, options);
   };
 };

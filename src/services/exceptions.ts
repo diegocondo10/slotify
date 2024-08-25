@@ -32,7 +32,6 @@ export class BaseException extends Error {
 export class ApiException extends BaseException {
   constructor(message: string, data?: any) {
     super(message, data);
-
     if (Array.isArray(data)) {
       this.allMessages = data.map((item) => item["detail"]);
       this.allMessagesLikeReact = mapApiErrors(this.allMessages);

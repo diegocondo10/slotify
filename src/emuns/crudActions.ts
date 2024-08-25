@@ -1,7 +1,7 @@
 export enum CrudActions {
-  CREATE = "create",
-  UPDATE = "update",
-  DELETE = "delete",
+  CREATE = "agregar",
+  UPDATE = "editar",
+  DELETE = "eliminar",
   RETRIEVE = "retrieve",
   LIST = "list",
 }
