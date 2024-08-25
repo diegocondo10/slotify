@@ -5,97 +5,125 @@ import FormFieldRender from "@/components/Forms/FormFieldRender";
 import TextArea from "@/components/Forms/TextArea";
 import TimePicker from "@/components/Forms/TimePicker";
 import Loading from "@/components/Loading";
+import { REQUIRED_MSG } from "@/constants/rules";
+import { CrudActions } from "@/emuns/crudActions";
+import useCreateUpdate from "@/hooks/useCreateUpdate";
+import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { ClienteService } from "@/services/clientes/clientes.service";
+import { PK } from "@/types/api";
+import { formatToTimeString, toBackDate, toFrontDate } from "@/utils/date";
 import classNames from "classnames";
 import { addMonths } from "date-fns";
 import { addHours } from "date-fns/addHours";
 import { subDays } from "date-fns/subDays";
+import { keyBy } from "lodash";
 import { PrimeIcons } from "primereact/api";
 import { Dialog } from "primereact/dialog";
 import { Tag } from "primereact/tag";
 import { Tooltip } from "primereact/tooltip";
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { useQuery } from "react-query";
 
-const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
-  const [visible, setVisible] = useState(true);
+const CitaModal = forwardRef<any, any>((props, ref) => {
+  const [visible, setVisible] = useState(false);
+  const [estadosIndexed, setEstadosIndexed] = useState<Record<string, any>>({});
   const [title, setTitle] = useState("Nueva Cita");
-  const methods = useForm({ mode: "onChange" });
+
+  const [action, setAction] = useState<any>(CrudActions.CREATE);
+
+  const [id, setId] = useState<PK | null>(null);
+
+  const methods = useForm<any>({
+    mode: "onChange",
+  });
 
   const queryEstados = useQuery(
     ["estados_citas", visible],
     () => new EstadoCitaService().listAsLabelValue(),
     {
       enabled: visible,
+      onSuccess: (data) => {
+        setEstadosIndexed(keyBy(data, "value.id"));
+      },
     }
   );
 
-  const queryClientes = useQuery(["clientes_list_label_value"], () =>
-    new ClienteService().listAsLabelValue()
+  const queryClientes = useQuery(
+    ["clientes_list_label_value", visible],
+    () => new ClienteService().listAsLabelValue(),
+    {
+      enabled: visible,
+    }
   );
 
-  const isLoading = queryEstados.isFetching || queryClientes.isFetching;
+  const queryRetrieve = useQuery(["cita", id], () => new CitaService().retrieve(id), {
+    enabled: !!id && action === CrudActions.UPDATE,
+    onSuccess: ({ data }) => {
+      data.fecha = toFrontDate(data.fecha);
+      data.horaInicio = toFrontDate(data.horaInicio);
+      data.horaFin = toFrontDate(data.horaFin);
+      methods.reset(data);
+    },
+  });
+
+  const mutation = useCreateUpdate({
+    action,
+    methods,
+    create: (formData) => new CitaService().create(formData),
+    update: (formData) => new CitaService().update(id, formData),
+  });
+
+  const isLoading = queryEstados.isFetching || queryClientes.isFetching || mutation.isLoading;
 
   const horaInicio = useWatch({
     name: "horaInicio",
     control: methods.control,
   });
 
-  const estado = useWatch({
+  const estadoForm = useWatch({
     name: "estado",
     control: methods.control,
   });
 
-  const onSubmit = (formData) => {
-    try {
-      const horaInicio = formData.horaInicio;
-      const horaFin = formData.horaFin;
-      const fecha = formData.fecha;
-
-      horaInicio.setDate(fecha.getDate());
-
-      horaFin.setDate(fecha.getDate());
-
-      onComplete({
-        title: `Evento `,
-        start: horaInicio,
-        end: horaFin,
-        resource: {
-          message: "Este es un evento",
-        },
-      });
-      setVisible(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const estado = useMemo(() => estadosIndexed?.[estadoForm] || null, [estadoForm, estadosIndexed]);
 
   const onHide = () => {
     setVisible(false);
+    setId(null);
+    setAction(null);
   };
 
   useImperativeHandle(ref, () => ({
     agregar: ({ date }) => {
       setTitle("Agregar Cita");
       setVisible(true);
+      setAction(CrudActions.CREATE);
       methods.reset({
         fecha: date,
         horaInicio: date,
         horaFin: addHours(date, 1),
       });
     },
-    editar: ({ date }) => {
+    editar: (id) => {
       setTitle("Editar Cita");
       setVisible(true);
-      methods.reset({
-        fecha: date,
-        horaInicio: date,
-      });
+      setAction(CrudActions.UPDATE);
+      setId(id);
     },
   }));
+  const onSubmit = async (formData) => {
+    try {
+      formData.fecha = toBackDate(formData.fecha);
+      formData.horaInicio = formatToTimeString(formData.horaInicio);
+      formData.horaFin = formatToTimeString(formData.horaFin);
 
+      await mutation.submitForm(formData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <FormProvider {...methods}>
       {visible && (
@@ -124,13 +152,13 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
               <div className='field col-12'>
                 <FormFieldRender
                   label='Paciente'
-                  name='paciente'
+                  name='cliente'
                   render={({ name }) => (
                     <DropDown
                       controller={{
                         name,
                         rules: {
-                          required: "Este campo es obligatorio",
+                          required: REQUIRED_MSG,
                         },
                       }}
                       block
@@ -160,10 +188,10 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                         <Tag
                           className='ml-2'
                           style={{
-                            backgroundColor: estado.color,
-                            color: estado.colorLetra,
+                            backgroundColor: estado.value.color,
+                            color: estado.value.colorLetra,
                           }}>
-                          {estado.label}
+                          {estado.value.label}
                         </Tag>
                       )}
                     </div>
@@ -172,7 +200,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                     <Controller
                       name={name}
                       rules={{
-                        required: "Este campo es obligatorio",
+                        required: REQUIRED_MSG,
                       }}
                       render={({ field }) => (
                         <div className='flex flex-row w-full'>
@@ -194,7 +222,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                               data-pr-position='right'
                               data-pr-at='right+5 top'
                               data-pr-my='left center-2'
-                              onClick={() => field.onChange(item.value)}>
+                              onClick={() => field.onChange(item.value.id)}>
                               <Tooltip target={`.estado-id-${item.value.codigo}`} />
                               {item.value.codigo}
                             </div>
@@ -216,7 +244,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                         controller={{
                           name,
                           rules: {
-                            required: "Este campo es obligatorio",
+                            required: REQUIRED_MSG,
                           },
                         }}
                         minDate={subDays(new Date(), 10)}
@@ -235,7 +263,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                         controller={{
                           name,
                           rules: {
-                            required: "Este campo es obligatorio",
+                            required: REQUIRED_MSG,
                             onChange: (evt) => {
                               console.log("ON CHANGE: ", evt?.target?.value);
                             },
@@ -259,7 +287,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                         controller={{
                           name,
                           rules: {
-                            required: "Este campo es obligatorio",
+                            required: REQUIRED_MSG,
                             min: {
                               value: horaInicio,
                               message: "La hora de fin debe ser mayor a la hora de inicio",

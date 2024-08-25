@@ -26,7 +26,7 @@ const Navbar = () => {
         <div className='grid'>
           <div className='col-12 text-center'>
             <i className={classNames(PrimeIcons.USER, "text-3xl w-full my-3")} />
-            <h4 className='p-0 my-2'>{session.data.user.email}</h4>
+            <h4 className='p-0 my-2'>{session?.data?.user?.email}</h4>
           </div>
           <div className='col-12'>
             <Button
