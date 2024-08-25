@@ -325,5 +325,5 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
     </FormProvider>
   );
 });
-
+CitaModal.displayName = "CitaModal";
 export default CitaModal;
