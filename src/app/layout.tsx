@@ -21,22 +21,16 @@ export default async function RootLayout({
     <html lang='en' style={{ fontSize: "0.9rem" }}>
       <head>
         <meta charSet='UTF-8' />
-        {/* Establece la codificación de caracteres en UTF-8, asegurando compatibilidad con la mayoría de los navegadores y caracteres. */}
-
         <meta
           name='viewport'
           content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
         />
-        {/* Controla la escala inicial de la página en dispositivos móviles y previene que el usuario pueda hacer zoom, asegurando una experiencia de usuario consistente. */}
-
         <meta httpEquiv='Content-Language' content='es' />
-        {/* Indica al navegador que el contenido está en español, ayudando a los motores de búsqueda y navegadores a procesar el contenido adecuadamente. */}
-
         <meta name='google' content='notranslate' />
-        {/* Previene que Google Chrome sugiera traducir la página, útil cuando la aplicación ya está en el idioma deseado (español). */}
-
-        <meta name='description' content='Slotify agendamiento de citas' />
-        {/* Proporciona una descripción de la página que puede ser utilizada en resultados de búsqueda y cuando la página se comparte en redes sociales. */}
+        <meta name='description' content='Generada por Create Next App' />
+        <link rel='manifest' href='/manifest.json' />
+        <meta name='theme-color' content='#317EFB' />
+        <link rel='icon' href='/icons/icon-192x192.png' />
         <title>Slotify</title>
       </head>
       <body>
