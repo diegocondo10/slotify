@@ -256,6 +256,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                             required: REQUIRED_MSG,
                           },
                         }}
+                        disabled
                         minDate={subDays(new Date(), 10)}
                         block
                         maxDate={addMonths(new Date(), 3)}
@@ -282,6 +283,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                         datePicker={{
                           placeholderText: "SELECCIONE...",
                           timeIntervals: 60,
+                          disabled: true,
                         }}
                       />
                     )}
