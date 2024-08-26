@@ -1,7 +1,7 @@
 {
-    "name": "Mi Aplicación Next.js",
-    "short_name": "MiApp",
-    "description": "Una aplicación web progresiva creada con Next.js",
+    "name": "Slotify",
+    "short_name": "Slofity",
+    "description": "Agendamiento de citas",
     "start_url": "/",
     "display": "standalone",
     "orientation": "portrait",

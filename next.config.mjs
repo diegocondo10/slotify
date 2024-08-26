@@ -1,22 +1,26 @@
-// next.config.mjs
+// Importa el plugin `next-pwa`
 import withPWA from "next-pwa";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Configuración específica de Next.js
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // Configuración de TypeScript
   },
   experimental: {
-    serverActions: true,
+    serverActions: true, // Características experimentales
   },
-  reactStrictMode: false,
-  compress: true,
+  reactStrictMode: false, // Desactiva el modo estricto de React
+  compress: true, // Habilita la compresión
 };
 
-export default withPWA({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-  ...nextConfig, // Extiende la configuración base
-});
+// Configuración específica para PWA
+const pwaConfig = {
+  dest: "public", // Directorio donde se generarán los archivos PWA
+  register: true, // Registra automáticamente el Service Worker
+  skipWaiting: true, // Activa el Service Worker inmediatamente
+  disable: process.env.NODE_ENV === "development", // Desactiva PWA en modo desarrollo
+};
+
+// Combina la configuración de PWA con la configuración de Next.js
+export default withPWA(pwaConfig)(nextConfig);
