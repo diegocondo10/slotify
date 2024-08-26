@@ -1,8 +1,8 @@
 {
     "rewrites": [
         {
-            "source": "/api/(.*)",
-            "destination": "http://18.208.49.158/api/$1/"
+            "source": "/api/v1/(.*)",
+            "destination": "http://18.208.49.158/api/v1/$1/"
         }
     ]
 }
