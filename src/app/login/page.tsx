@@ -3,6 +3,7 @@
 import Button from "@/components/Buttons/Button";
 import FormFieldRender from "@/components/Forms/FormFieldRender";
 import TextInput from "@/components/Forms/TextInput";
+import useToasts from "@/hooks/useToasts";
 import { signIn } from "next-auth/react";
 import { Card } from "primereact/card";
 import { FormProvider, useForm } from "react-hook-form";
@@ -16,6 +17,8 @@ export default function LoginPage() {
     },
   });
 
+  const toast = useToasts();
+
   const isSubmitting = methods.formState.isSubmitting;
 
   const handleSubmit = async (formData) => {
@@ -25,7 +28,9 @@ export default function LoginPage() {
         callbackUrl: "/dashboard",
         ...formData,
       });
-    } catch (error) {}
+    } catch (error) {
+      toast.addErrorToast("Ha ocurrido un problema, por favor verifica tus crendeciales");
+    }
   };
 
   return (
