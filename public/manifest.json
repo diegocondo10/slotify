@@ -1,6 +1,6 @@
 {
     "name": "Slotify",
-    "short_name": "Slofity",
+    "short_name": "Slotify",
     "description": "Agendamiento de citas",
     "start_url": "/",
     "display": "standalone",
@@ -48,6 +48,5 @@
             "sizes": "512x512",
             "type": "image/png"
         }
-    ],
-    "splash_pages": null
+    ]
 }
