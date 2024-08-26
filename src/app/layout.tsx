@@ -9,7 +9,7 @@ import "./globals.scss";
 export const metadata: Metadata = {
   title: "Slotify",
   description: "Agendamiento de citas",
-  manifest: "/webmanifest.json",
+  manifest: "manifest.json",
 };
 
 export default async function RootLayout({
