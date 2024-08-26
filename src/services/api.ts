@@ -1,7 +1,12 @@
 import axios, { CreateAxiosDefaults } from "axios";
 
+const baseURL =
+  typeof window === "undefined"
+    ? process.env.NEXT_PUBLIC_API_BASE_URL_SERVER // URL de la API real en SSR desde el servidor
+    : process.env.NEXT_PUBLIC_API_BASE_URL_CLIENT;
+
 const API = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL,
   timeout: 10000,
   headers: {
     "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
@@ -9,7 +14,7 @@ const API = axios.create({
 });
 export const createApi = (config?: CreateAxiosDefaults) => {
   return axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    baseURL,
     timeout: 10000,
     headers: {
       "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
