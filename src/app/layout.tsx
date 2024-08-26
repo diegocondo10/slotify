@@ -18,7 +18,7 @@ export default async function RootLayout({
 }>) {
   const session = await getServerSession(authOptions);
   return (
-    <html lang='en' style={{ fontSize: "0.9rem" }}>
+    <html lang='es' style={{ fontSize: "0.9rem" }}>
       <head>
         <meta charSet='UTF-8' />
         <meta
@@ -28,7 +28,7 @@ export default async function RootLayout({
         <meta httpEquiv='Content-Language' content='es' />
         <meta name='google' content='notranslate' />
         <meta name='description' content='Generada por Create Next App' />
-        <link rel='manifest' href='/manifest.json' />
+        <link rel='manifest' href='/webmanifest.json' />
         <meta name='theme-color' content='#317EFB' />
         <link rel='icon' href='/icons/icon-192x192.png' />
         <title>Slotify</title>
