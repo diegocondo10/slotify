@@ -5,31 +5,39 @@ import FormFieldRender from "@/components/Forms/FormFieldRender";
 import TextInput from "@/components/Forms/TextInput";
 import useToasts from "@/hooks/useToasts";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Card } from "primereact/card";
 import { FormProvider, useForm } from "react-hook-form";
 
 export default function LoginPage() {
   const methods = useForm({
     mode: "onChange",
-    defaultValues: {
-      email: "diegocondo1007@gmail.com",
-      password: "31139121cD*",
-    },
   });
 
   const toast = useToasts();
+
+  const router = useRouter();
 
   const isSubmitting = methods.formState.isSubmitting;
 
   const handleSubmit = async (formData) => {
     try {
-      await signIn("credentials", {
-        redirect: true,
-        callbackUrl: "/dashboard",
+      const response = await signIn("credentials", {
+        redirect: false,
         ...formData,
       });
+
+      if (response.ok) {
+        return router.push("/dashboard");
+      }
+      toast.addErrorToast(
+        "Ha ocurrido un problema al momento de procesar tu solicitud, por favor verifica tus credenciales"
+      );
     } catch (error) {
-      toast.addErrorToast("Ha ocurrido un problema, por favor verifica tus crendeciales");
+      console.log(error);
+      toast.addErrorToast(
+        "Ha ocurrido un problema inesperado, por favor contactate con el administrador"
+      );
     }
   };
 
