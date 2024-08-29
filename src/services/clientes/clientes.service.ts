@@ -8,4 +8,7 @@ export class ClienteService extends BaseService<ClientesUrls> {
   async listAsLabelValue() {
     return (await this.privateApi.get(this.urls.listAsLabelValue)).data;
   }
+  async createBasic(fullName: string): Promise<{ id: string; fullName: string }> {
+    return (await this.privateApi.post(this.urls.createBasic, { fullName })).data;
+  }
 }

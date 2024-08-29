@@ -3,6 +3,7 @@ import { BaseURLs } from "../types";
 
 export interface ClientesUrls extends BaseURLs {
   listAsLabelValue: string;
+  createBasic: string;
 }
 
 export const CLIENTES_URLS: ClientesUrls = {
@@ -12,4 +13,5 @@ export const CLIENTES_URLS: ClientesUrls = {
   retrieve: (id: PK) => `clientes/${id}/`,
   update: (id: PK) => `clientes/${id}/`,
   listAsLabelValue: "clientes/label-value/",
+  createBasic: "clientes/create-basic/",
 };
