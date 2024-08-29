@@ -1,11 +1,13 @@
 "use client";
 
+import { CrudActions } from "@/emuns/crudActions";
 import { CitaService } from "@/services/citas/citas.service";
 import { formatToTimeString, toBackDate } from "@/utils/date";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
 import { isEqual } from "date-fns";
+import { useRouter } from "next/navigation";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useRef, useState } from "react";
 import { useQuery } from "react-query";
@@ -13,6 +15,9 @@ import CitaModal from "./components/CitaModal";
 
 const DashboardPage = () => {
   const dialogRef = useRef(null);
+
+  const router = useRouter();
+
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
     end: null,
@@ -26,7 +31,8 @@ const DashboardPage = () => {
   );
 
   const handleEventClick = (info: any): void => {
-    dialogRef.current.editar(info.event.id);
+    // dialogRef.current.editar(info.event.id);
+    router.push(`/dashboard/cita?action=${CrudActions.UPDATE}&id=${info.event.id}`);
   };
 
   const handleEventDrop = async (info: any): Promise<void> => {
@@ -39,8 +45,11 @@ const DashboardPage = () => {
   };
 
   const handleSlotClick = (info) => {
-    dialogRef.current.agregar({ date: info.date });
+    const fecha = encodeURIComponent(info.date.toISOString());
+    // console.log(new Date().toISOString);
+    router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}`);
   };
+
   const handleDatesSet = (dateInfo) => {
     const newRange = {
       start: dateInfo?.start,

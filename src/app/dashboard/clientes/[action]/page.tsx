@@ -139,9 +139,6 @@ const ClientesForm = ({ params, searchParams }) => {
                       block
                       controller={{
                         name,
-                        rules: {
-                          required: REQUIRED_MSG,
-                        },
                       }}
                     />
                   )}
@@ -173,9 +170,6 @@ const ClientesForm = ({ params, searchParams }) => {
                       block
                       controller={{
                         name,
-                        rules: {
-                          required: REQUIRED_MSG,
-                        },
                       }}
                     />
                   )}

@@ -1,5 +1,6 @@
 import classNames from "classnames";
-import React from "react";
+import { InputText } from "primereact/inputtext";
+import React, { forwardRef } from "react";
 import DatePicker, { DatePickerProps } from "react-datepicker";
 import { Controller } from "react-hook-form";
 import { ControllerProps } from "./types";
@@ -12,8 +13,23 @@ export interface TimePickerProps {
   timePeriod?: "AM" | "PM";
 }
 
+const TimeInput = forwardRef<any, any>(({ value, onClick, className, disabled, ...rest }, ref) => (
+  <InputText
+    role='button'
+    value={value}
+    onClick={onClick}
+    {...rest}
+    className={classNames("cursor-pointer", className)}
+    ref={ref}
+    readOnly
+    disabled={disabled}
+  />
+));
+
+TimeInput.displayName = "TimeInput";
+
 const TimePicker: React.FC<TimePickerProps> = (props) => {
-  const { controller, block, datePicker, className, timePeriod } = props;
+  const { controller, block, datePicker, className } = props;
 
   return (
     <Controller
@@ -43,6 +59,7 @@ const TimePicker: React.FC<TimePickerProps> = (props) => {
           wrapperClassName={classNames(datePicker?.wrapperClassName, {
             "w-full": block,
           })}
+          customInput={<TimeInput />}
           // ref={field.ref}
         />
       )}

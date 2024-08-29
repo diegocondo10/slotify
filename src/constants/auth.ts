@@ -20,6 +20,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           const data = await new AuthService().login(credentials.email, credentials.password);
+          console.log("DATA: ", data);
           return {
             accessToken: data.access,
             refreshToken: data.refresh,

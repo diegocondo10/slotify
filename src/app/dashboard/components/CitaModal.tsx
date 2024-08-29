@@ -16,6 +16,7 @@ import { formatToTimeString, toBackDate, toFrontDate } from "@/utils/date";
 import classNames from "classnames";
 import { addMonths } from "date-fns";
 import { addHours } from "date-fns/addHours";
+import { setHours } from "date-fns/setHours";
 import { subDays } from "date-fns/subDays";
 import { keyBy } from "lodash";
 import { PrimeIcons } from "primereact/api";
@@ -25,6 +26,8 @@ import { Tooltip } from "primereact/tooltip";
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { useQuery } from "react-query";
+
+const today = new Date();
 
 const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
   const [visible, setVisible] = useState(false);
@@ -133,7 +136,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
           visible={visible}
           onHide={onHide}
           draggable={false}
-          breakpoints={{ "0px": "100vw", "641px": "80vw", "999999px": "75vw" }}
+          breakpoints={{  "641px": "100vw", "999999px": "75vw" }}
           contentStyle={{
             minHeight: "35rem",
           }}
@@ -256,9 +259,10 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                             required: REQUIRED_MSG,
                           },
                         }}
+                        inputClassName='font-bold text-center'
                         disabled
-                        minDate={subDays(new Date(), 10)}
                         block
+                        minDate={subDays(new Date(), 10)}
                         maxDate={addMonths(new Date(), 3)}
                       />
                     )}
@@ -275,7 +279,7 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                           rules: {
                             required: REQUIRED_MSG,
                             onChange: (evt) => {
-                              console.log("ON CHANGE: ", evt?.target?.value);
+                              methods.setValue("horaFin", null);
                             },
                           },
                         }}
@@ -310,6 +314,9 @@ const CitaModal = forwardRef<any, any>(({ onComplete }, ref) => {
                           placeholderText: "SELECCIONE...",
                           disabled: !!!horaInicio,
                           timeIntervals: 60,
+                          calendarClassName: "hide-disabled-times",
+                          minTime: setHours(today, horaInicio.getHours()),
+                          maxTime: setHours(today, 22),
                         }}
                       />
                     )}

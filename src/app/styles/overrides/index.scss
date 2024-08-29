@@ -17,3 +17,9 @@
     font-weight: bold;
   }
 }
+
+.hide-disabled-times {
+  .react-datepicker__time-list-item--disabled {
+    display: none;
+  }
+}
