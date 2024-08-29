@@ -139,13 +139,12 @@ const CitaPage = ({ searchParams }) => {
     setIsCreating(true);
     try {
       const response = await new ClienteService().createBasic(inputValue);
-      setPacientes([
-        {
-          label: response.fullName,
-          value: response.id,
-        },
-        ...pacientes,
-      ]);
+      const newCliente = {
+        label: response.fullName,
+        value: response.id,
+      };
+      methods.setValue("cliente", newCliente);
+      setPacientes([newCliente, ...pacientes]);
     } catch (error) {
       toast.addErrorToast("Ha ocurrido un problema al momento de crear el nuevo paciente");
     }
