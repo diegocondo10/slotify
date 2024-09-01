@@ -15,17 +15,19 @@ import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Tag } from "primereact/tag";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
+  const blurRef = useRef(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
     end: null,
   });
+  const [triggerRerender, setTriggerRerender] = useState(false); // Estado para forzar re-render
 
   const queryCitas = useQuery(
     ["citas", currentRange],
@@ -36,7 +38,6 @@ const DashboardPage = () => {
   );
 
   const handleEventClick = (info: EventClickArg): void => {
-    console.log("CLICK: ", info);
     //@ts-ignore
     op.current.toggle(info.jsEvent, info.el);
     setSelectedEvent(info.event);
@@ -49,7 +50,23 @@ const DashboardPage = () => {
       horaFin: formatToTimeString(info.event.end),
     });
     queryCitas.refetch();
+
+    info.el.blur();
+
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    if (blurRef.current) {
+      blurRef.current.focus();
+    }
+    setTriggerRerender(true);
   };
+
+  useEffect(() => {
+    if (triggerRerender) {
+      setTriggerRerender(false);
+    }
+  }, [triggerRerender]);
 
   let clickTimeout = null;
 
@@ -95,6 +112,8 @@ const DashboardPage = () => {
           <p className='font-bold text-xl'>Buscando...</p>
         </div>
       )}
+      <button ref={blurRef} style={{ position: "absolute", opacity: 0, pointerEvents: "none" }} />
+
       <OverlayPanel style={{ maxWidth: "20rem" }} ref={op} dismissable>
         {selectedEvent && (
           <div className='flex flex-column'>
