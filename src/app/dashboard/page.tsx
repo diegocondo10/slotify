@@ -1,27 +1,32 @@
 "use client";
 
+import Button from "@/components/Buttons/Button";
 import { CrudActions } from "@/emuns/crudActions";
 import { CitaService } from "@/services/citas/citas.service";
 import { formatToTimeString, toBackDate } from "@/utils/date";
+import { EventClickArg } from "@fullcalendar/core/index.js";
+import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
-import { isEqual } from "date-fns";
+import { format, isEqual } from "date-fns";
 import { useRouter } from "next/navigation";
+import { PrimeIcons } from "primereact/api";
+import { OverlayPanel } from "primereact/overlaypanel";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { Tag } from "primereact/tag";
 import { useRef, useState } from "react";
 import { useQuery } from "react-query";
-import CitaModal from "./components/CitaModal";
 
 const DashboardPage = () => {
-  const dialogRef = useRef(null);
-
   const router = useRouter();
-
+  const op = useRef<OverlayPanel>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
     end: null,
   });
+
   const queryCitas = useQuery(
     ["citas", currentRange],
     () => new CitaService().listByRange(currentRange.start, currentRange.end),
@@ -30,9 +35,10 @@ const DashboardPage = () => {
     }
   );
 
-  const handleEventClick = (info: any): void => {
-    // dialogRef.current.editar(info.event.id);
-    router.push(`/dashboard/cita?action=${CrudActions.UPDATE}&id=${info.event.id}`);
+  const handleEventClick = (info: EventClickArg): void => {
+    //@ts-ignore
+    op.current.toggle(info.jsEvent, info.el);
+    setSelectedEvent(info.event);
   };
 
   const handleEventDrop = async (info: any): Promise<void> => {
@@ -77,16 +83,58 @@ const DashboardPage = () => {
           <p className='font-bold text-xl'>Buscando...</p>
         </div>
       )}
-      <CitaModal ref={dialogRef} onComplete={() => queryCitas.refetch()} />
+      <OverlayPanel style={{ maxWidth: "20rem" }} ref={op} dismissable>
+        {selectedEvent && (
+          <div className='flex flex-column'>
+            <div className='flex flex-row align-items-center'>
+              <h4 className='m-0'>{selectedEvent.title}</h4>
+              <Button
+                className='mx-1'
+                variant='info'
+                icon={PrimeIcons.PENCIL}
+                rounded
+                href={`/dashboard/cita?action=${CrudActions.UPDATE}&id=${selectedEvent.id}`}
+              />
+              <Button
+                className='mx-1'
+                variant='danger'
+                icon={PrimeIcons.TRASH}
+                rounded
+                onClick={() => {
+                  // Lógica para eliminar el evento
+                }}
+              />
+            </div>
+            <div>
+              <Tag
+                style={{
+                  backgroundColor: selectedEvent.backgroundColor,
+                  color: selectedEvent.textColor,
+                }}>
+                {selectedEvent.extendedProps.estadoLabel}
+              </Tag>
+            </div>
+            <p className='my-1'>
+              <strong>Fecha:</strong> {format(selectedEvent.start, "dd/MM/yyy")}
+            </p>
+            <p className='my-1'>
+              <strong>Hora:</strong> {format(selectedEvent.start, "hh:mm a")} {" - "}
+              {format(selectedEvent.end, "hh:mm a")}
+            </p>
+          </div>
+        )}
+      </OverlayPanel>
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView='timeGridWeek' // Vista inicial en el calendario
         locale='es' // Configura el idioma a español
         weekends={true} // Mostrar fines de semana
-        editable={true} // Habilita el drag and drop
-        droppable={true} // Permite arrastrar eventos externos
         eventResizableFromStart={false}
         dateClick={handleSlotClick}
+        editable={true} // Habilita el drag and drop
+        // droppable={true} // Permite arrastrar eventos externos
+        // editable={window.innerWidth >= 768}
+        droppable={window.innerWidth >= 768}
         events={
           queryCitas?.data ||
           [

@@ -23,3 +23,15 @@
     display: none;
   }
 }
+
+.fc-event-resizer.fc-event-resizer-end {
+  display: none !important;
+}
+
+.fc-event-time {
+  display: none;
+}
+
+.fc-timegrid-slot-label-cushion {
+  font-weight: 400;
+}
