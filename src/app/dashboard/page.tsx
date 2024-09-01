@@ -51,10 +51,21 @@ const DashboardPage = () => {
     queryCitas.refetch();
   };
 
+  let clickTimeout = null;
+
   const handleSlotClick = (info) => {
-    const fecha = encodeURIComponent(info.date.toISOString());
-    // console.log(new Date().toISOString);
-    router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}`);
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      clickTimeout = null;
+      // Realiza la acción en doble clic
+      const fecha = encodeURIComponent(info.date.toISOString());
+      router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}`);
+    } else {
+      clickTimeout = setTimeout(() => {
+        clickTimeout = null;
+        // Aquí podrías manejar el clic simple si lo necesitas, o dejarlo vacío
+      }, 300); // Intervalo de tiempo para distinguir entre clic simple y doble clic
+    }
   };
 
   const handleDatesSet = (dateInfo) => {
