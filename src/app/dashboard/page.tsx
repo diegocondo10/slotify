@@ -21,7 +21,7 @@ import { useQuery } from "react-query";
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
-  const blurRef = useRef(null);
+
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
@@ -33,7 +33,10 @@ const DashboardPage = () => {
     ["citas", currentRange],
     () => new CitaService().listByRange(currentRange.start, currentRange.end),
     {
-      enabled: !!currentRange.start && !!currentRange.end, // Solo habilitar cuando hay un rango definido
+      enabled: !!currentRange.start && !!currentRange.end, // Solo habilitar cuando hay un rango definido,
+      onSuccess: () => {
+        op.current.hide();
+      },
     }
   );
 
@@ -50,16 +53,6 @@ const DashboardPage = () => {
       horaFin: formatToTimeString(info.event.end),
     });
     queryCitas.refetch();
-
-    info.el.blur();
-
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-    if (blurRef.current) {
-      blurRef.current.focus();
-    }
-    setTriggerRerender(true);
   };
 
   useEffect(() => {
@@ -112,7 +105,6 @@ const DashboardPage = () => {
           <p className='font-bold text-xl'>Buscando...</p>
         </div>
       )}
-      <button ref={blurRef} style={{ position: "absolute", opacity: 0, pointerEvents: "none" }} />
 
       <OverlayPanel style={{ maxWidth: "20rem" }} ref={op} dismissable>
         {selectedEvent && (
@@ -167,22 +159,24 @@ const DashboardPage = () => {
         // selectLongPressDelay={500}
         // slotEventOverlap
         editable={true} // Habilita el drag and drop
-        events={
-          queryCitas?.data ||
-          [
-            // {
-            // }
-          ]
-        }
+        events={queryCitas?.data || []}
         headerToolbar={{
           left: "prev,next today",
           center: "title",
-          right: "timeGridWeek,timeGridDay", // Solo las vistas de semana y día
+          right: "customReload,timeGridWeek,timeGridDay", // Solo las vistas de semana y día
         }}
         buttonText={{
           today: "Hoy",
           week: "Semana",
           day: "Día",
+        }}
+        customButtons={{
+          customReload: {
+            text: "Recargar",
+            click: () => {
+              queryCitas.refetch();
+            },
+          },
         }}
         allDaySlot={false} // Desactiva el slot de todo el día
         slotMinTime='05:00:00' // Hora mínima disponible (5:00 AM)
@@ -200,10 +194,8 @@ const DashboardPage = () => {
         expandRows={true} // Asegura que las filas se expandan para ocupar el espacio disponible
         snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
         datesSet={handleDatesSet} // Manejador para capturar la fecha visible actual
-        // eventResizeStop={handleEventDrop}
         longPressDelay={300} // Reduce el tiempo necesario para empezar a arrastrar en dispositivos móviles
         dragScroll={true} // Permite que la vista se desplace mientras arrastras un evento
-        //dragOpacity={0.8} // Mejora la visibilidad del evento mientras se arrastra
       />
     </div>
   );

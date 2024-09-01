@@ -1,5 +1,6 @@
 "use client";
 
+import usePreventPullToRefresh from "@/hooks/usePreventPullToRefresh";
 import React, { PropsWithChildren } from "react";
 import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -13,6 +14,7 @@ const queryClient = new QueryClient({
 });
 
 const QueryClientContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
+  usePreventPullToRefresh();
   return (
     <QueryClientProvider client={queryClient}>
       {children}
