@@ -16,10 +16,10 @@ const nextConfig = {
 
 // Configuración específica para PWA
 const pwaConfig = {
-  dest: "public", // Directorio donde se generarán los archivos PWA
-  register: true, // Registra automáticamente el Service Worker
-  skipWaiting: true, // Activa el Service Worker inmediatamente
-  disable: process.env.NODE_ENV === "development", // Desactiva PWA en modo desarrollo
+  dest: "public",
+  disable: false,
+  register: true,
+  skipWaiting: true,
 };
 
 // Combina la configuración de PWA con la configuración de Next.js
