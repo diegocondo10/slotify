@@ -36,12 +36,13 @@ const DashboardPage = () => {
   );
 
   const handleEventClick = (info: EventClickArg): void => {
+    console.log("CLICK: ", info);
     //@ts-ignore
     op.current.toggle(info.jsEvent, info.el);
     setSelectedEvent(info.event);
   };
 
-  const handleEventDrop = async (info: any): Promise<void> => {
+  const handleEventDrop = async (info: EventClickArg): Promise<void> => {
     await new CitaService().reagendar(info.event.id, {
       fecha: toBackDate(info.event.start),
       horaInicio: formatToTimeString(info.event.start),
@@ -130,11 +131,12 @@ const DashboardPage = () => {
         locale='es' // Configura el idioma a español
         weekends={true} // Mostrar fines de semana
         eventResizableFromStart={false}
+        // eventResize={false}
+        _resize={() => false}
         dateClick={handleSlotClick}
+        // selectLongPressDelay={500}
+        // slotEventOverlap
         editable={true} // Habilita el drag and drop
-        // droppable={true} // Permite arrastrar eventos externos
-        // editable={window.innerWidth >= 768}
-        droppable={window.innerWidth >= 768}
         events={
           queryCitas?.data ||
           [
@@ -169,6 +171,9 @@ const DashboardPage = () => {
         snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
         datesSet={handleDatesSet} // Manejador para capturar la fecha visible actual
         // eventResizeStop={handleEventDrop}
+        longPressDelay={300} // Reduce el tiempo necesario para empezar a arrastrar en dispositivos móviles
+        dragScroll={true} // Permite que la vista se desplace mientras arrastras un evento
+        //dragOpacity={0.8} // Mejora la visibilidad del evento mientras se arrastra
       />
     </div>
   );
