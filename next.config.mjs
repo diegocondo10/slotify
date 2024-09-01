@@ -14,13 +14,11 @@ const nextConfig = {
   compress: true, // Habilita la compresión
 };
 
-// Configuración específica para PWA
-const pwaConfig = {
+// Combina la configuración de PWA con la configuración de Next.js
+export default withPWA({
   dest: "public",
   disable: false,
   register: true,
   skipWaiting: true,
-};
-
-// Combina la configuración de PWA con la configuración de Next.js
-export default withPWA(pwaConfig)(nextConfig);
+  disableDevLogs: true,
+})(nextConfig);

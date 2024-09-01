@@ -21,7 +21,7 @@ import { useQuery } from "react-query";
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
-
+  const blurRef = useRef<HTMLDivElement>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
@@ -39,11 +39,19 @@ const DashboardPage = () => {
       },
     }
   );
-
+  let eventClickTimeOut = null;
   const handleEventClick = (info: EventClickArg): void => {
-    //@ts-ignore
-    op.current.toggle(info.jsEvent, info.el);
-    setSelectedEvent(info.event);
+    if (eventClickTimeOut) {
+      clearTimeout(eventClickTimeOut);
+      console.log("CLICK: ", info);
+      //@ts-ignore
+      op.current.toggle(info.jsEvent, info.el);
+      setSelectedEvent(info.event);
+    } else {
+      eventClickTimeOut = setTimeout(() => {
+        eventClickTimeOut = null;
+      }, 300);
+    }
   };
 
   const handleEventDrop = async (info: EventClickArg): Promise<void> => {
@@ -53,6 +61,9 @@ const DashboardPage = () => {
       horaFin: formatToTimeString(info.event.end),
     });
     queryCitas.refetch();
+    if (info.el) {
+      // info.el.classList.remove("fc-event-selected");
+    }
   };
 
   useEffect(() => {
@@ -105,6 +116,18 @@ const DashboardPage = () => {
           <p className='font-bold text-xl'>Buscando...</p>
         </div>
       )}
+      <div
+        ref={blurRef}
+        tabIndex={-1}
+        style={{
+          position: "absolute",
+          top: "-1000px",
+          left: "-1000px",
+          width: "1px",
+          height: "1px",
+          opacity: 0,
+          pointerEvents: "none",
+        }}></div>
 
       <OverlayPanel style={{ maxWidth: "20rem" }} ref={op} dismissable>
         {selectedEvent && (
@@ -190,6 +213,11 @@ const DashboardPage = () => {
         hiddenDays={[0]} // Oculta los domingos
         eventDrop={handleEventDrop} // Manejador para cuando se arrastra y suelta un evento
         eventClick={handleEventClick} // Manejador para clic en un evento
+        eventResize={(evt) => {
+          console.log("RESIZE: ", evt);
+        }}
+        dragRevertDuration={300}
+        eventDurationEditable
         height='100%' // Hace que el calendario ocupe el 100% del contenedor
         expandRows={true} // Asegura que las filas se expandan para ocupar el espacio disponible
         snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
