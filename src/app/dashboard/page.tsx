@@ -43,7 +43,6 @@ const DashboardPage = () => {
   const handleEventClick = (info: EventClickArg): void => {
     if (eventClickTimeOut) {
       clearTimeout(eventClickTimeOut);
-      console.log("CLICK: ", info);
       //@ts-ignore
       op.current.toggle(info.jsEvent, info.el);
       setSelectedEvent(info.event);
@@ -61,8 +60,38 @@ const DashboardPage = () => {
       horaFin: formatToTimeString(info.event.end),
     });
     queryCitas.refetch();
-    if (info.el) {
-      // info.el.classList.remove("fc-event-selected");
+
+    if (blurRef.current) {
+      const touch = new Touch({
+        identifier: Date.now(),
+        target: blurRef.current,
+        clientX: blurRef.current.getBoundingClientRect().left,
+        clientY: blurRef.current.getBoundingClientRect().top,
+        pageX: blurRef.current.getBoundingClientRect().left + window.scrollX,
+        pageY: blurRef.current.getBoundingClientRect().top + window.scrollY,
+        screenX: blurRef.current.getBoundingClientRect().left,
+        screenY: blurRef.current.getBoundingClientRect().top,
+        radiusX: 0,
+        radiusY: 0,
+        rotationAngle: 0,
+        force: 1,
+      });
+
+      const touchStartEvent = new TouchEvent("touchstart", {
+        bubbles: true,
+        cancelable: true,
+        touches: [touch],
+      });
+
+      const touchEndEvent = new TouchEvent("touchend", {
+        bubbles: true,
+        cancelable: true,
+        touches: [touch],
+      });
+
+      // Despacha los eventos táctiles en el elemento referenciado por blurRef
+      blurRef.current.dispatchEvent(touchStartEvent);
+      blurRef.current.dispatchEvent(touchEndEvent);
     }
   };
 
@@ -78,14 +107,13 @@ const DashboardPage = () => {
     if (clickTimeout) {
       clearTimeout(clickTimeout);
       clickTimeout = null;
-      // Realiza la acción en doble clic
+
       const fecha = encodeURIComponent(info.date.toISOString());
       router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}`);
     } else {
       clickTimeout = setTimeout(() => {
         clickTimeout = null;
-        // Aquí podrías manejar el clic simple si lo necesitas, o dejarlo vacío
-      }, 300); // Intervalo de tiempo para distinguir entre clic simple y doble clic
+      }, 300);
     }
   };
 
@@ -127,29 +155,34 @@ const DashboardPage = () => {
           height: "1px",
           opacity: 0,
           pointerEvents: "none",
-        }}></div>
+        }}
+      />
 
       <OverlayPanel style={{ maxWidth: "20rem" }} ref={op} dismissable>
         {selectedEvent && (
           <div className='flex flex-column'>
             <div className='flex flex-row align-items-center'>
-              <h4 className='m-0'>{selectedEvent.title}</h4>
-              <Button
-                className='mx-1'
-                variant='info'
-                icon={PrimeIcons.PENCIL}
-                rounded
-                href={`/dashboard/cita?action=${CrudActions.UPDATE}&id=${selectedEvent.id}`}
-              />
-              <Button
-                className='mx-1'
-                variant='danger'
-                icon={PrimeIcons.TRASH}
-                rounded
-                onClick={() => {
-                  // Lógica para eliminar el evento
-                }}
-              />
+              <h4 className='m-0 w-10rem'>{selectedEvent.title}</h4>
+              <div className='flex flex-row w-6rem justify-content-around'>
+                <Button
+                  className='mx-1'
+                  sm
+                  variant='info'
+                  icon={PrimeIcons.PENCIL}
+                  rounded
+                  href={`/dashboard/cita?action=${CrudActions.UPDATE}&id=${selectedEvent.id}`}
+                />
+                <Button
+                  className='mx-1'
+                  sm
+                  variant='danger'
+                  icon={PrimeIcons.TRASH}
+                  rounded
+                  onClick={() => {
+                    // Lógica para eliminar el evento
+                  }}
+                />
+              </div>
             </div>
             <div>
               <Tag
@@ -184,7 +217,7 @@ const DashboardPage = () => {
         editable={true} // Habilita el drag and drop
         events={queryCitas?.data || []}
         headerToolbar={{
-          left: "prev,next today",
+          left: "prev,today,next",
           center: "title",
           right: "customReload,timeGridWeek,timeGridDay", // Solo las vistas de semana y día
         }}

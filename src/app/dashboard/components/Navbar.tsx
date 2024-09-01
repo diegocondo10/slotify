@@ -30,7 +30,15 @@ const Navbar = () => {
           </div>
           <div className='col-12'>
             <Button
-              className='btn-logout rounded-0'
+              className='border-noround mb-1'
+              label='Recargar'
+              icon={PrimeIcons.REFRESH}
+              variant='info'
+              block
+              onClick={() => window.location.reload()}
+            />
+            <Button
+              className='btn-logout border-noround'
               outlined
               sm
               label='Salir'

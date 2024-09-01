@@ -1,0 +1,52 @@
+.fc-event-resizer.fc-event-resizer-end {
+  display: none !important;
+}
+
+.fc-event-time {
+  display: none;
+}
+
+.fc-timegrid-slot-label-cushion {
+  font-weight: 400;
+}
+
+.fc-event-title {
+  font-size: 0.9rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.85rem; // Ajuste del tamaño de fuente para pantallas pequeñas
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.7rem; // Ajuste del tamaño de fuente para pantallas muy pequeñas
+  }
+}
+
+.fc-header-toolbar {
+  padding-top: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.fc-button {
+  @media (max-width: 768px) {
+    font-size: 0.85rem !important;
+    padding: 0.2rem !important;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem !important;
+    padding: 0.2rem !important;
+  }
+}
+
+.fc-toolbar-title {
+  font-size: 1.5rem !important;
+  text-align: center !important;
+}
+
+.remove-before-after::before,
+.remove-before-after::after {
+  content: none !important;
+  display: none !important;
+}

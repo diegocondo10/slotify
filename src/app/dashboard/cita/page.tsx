@@ -348,8 +348,18 @@ const CitaPage = ({ searchParams }) => {
                   </div>
                 </div>
                 <div className='field col-12'>
-                  <label htmlFor='notas'>Notas:</label>
-                  <TextArea controller={{ name: "notas" }} block rows={5} />
+                  <FormFieldRender
+                    name='notas'
+                    label='Notas:'
+                    render={({ name }) => <TextArea controller={{ name }} block rows={5} />}
+                  />
+                </div>
+                <div className='field col-12'>
+                  <FormFieldRender
+                    name='tareas'
+                    label='Tareas:'
+                    render={({ name }) => <TextArea controller={{ name }} block rows={5} />}
+                  />
                 </div>
               </div>
             </Card>

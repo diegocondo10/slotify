@@ -5,10 +5,13 @@
 @import "~primereact/resources/primereact.min.css";
 
 @import "~primereact/resources/themes/mdc-light-deeppurple/theme.css";
+// @import "~primereact/resources/themes/fluent-light/theme.css";
+// @import "~primereact/resources/themes/lara-light-blue/theme.css";
+
 @import "~react-datepicker/dist/react-datepicker.css";
 @import "~ckeditor5/ckeditor5.css";
 @import "~react-big-calendar/lib/css/react-big-calendar.css";
-@import 'styles/overrides/index.scss';
+@import "styles/overrides/index.scss";
 @import "styles/typography.scss";
 // @tailwind base;
 // @tailwind components;
@@ -33,39 +36,4 @@
 
 body {
   height: 100%;
-}
-
-.rbc-header > * {
-  font-weight: bold !important;
-  text-transform: uppercase !important;
-  font-size: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 2rem;
-}
-
-.rbc-toolbar-label {
-  font-weight: bold;
-  text-transform: uppercase;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.rbc-events-container {
-  cursor: pointer;
-}
-
-.rbc-day-bg {
-  cursor: pointer;
-}
-
-.rbc-row-content {
-  cursor: pointer;
-}
-
-.rbc-event-label {
-  display: none;
-}
-
-.rbc-allday-cell {
-  display: none;
 }

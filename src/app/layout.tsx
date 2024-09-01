@@ -4,7 +4,14 @@ import LocaleContext from "@/context/LocaleContext";
 import QueryClientContextProvider from "@/context/QueryClientContextProvider";
 import type { Metadata, Viewport } from "next";
 import { getServerSession } from "next-auth";
+import { Roboto } from "next/font/google";
 import "./globals.scss";
+
+const roboto = Roboto({
+  weight: ["100", "300", "400", "500", "700", "900"], // Puedes incluir otros pesos si los necesitas
+  subsets: ["latin"], // Puedes agregar otros subconjuntos si es necesario
+  display: "swap", // Configura 'swap' para que la fuente se cargue de manera más eficiente
+});
 
 export const metadata: Metadata = {
   title: "Slotify",
@@ -34,7 +41,7 @@ export default async function RootLayout({
         <meta name='google' content='notranslate' />
         <meta name='theme-color' content='#317EFB' />
       </head>
-      <body>
+      <body className={roboto.className}>
         <QueryClientContextProvider>
           <LocaleContext>
             <ClientSessionProvider session={session}>{children}</ClientSessionProvider>
