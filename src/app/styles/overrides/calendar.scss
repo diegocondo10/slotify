@@ -12,7 +12,9 @@
 
 .fc-event-title {
   font-size: 0.9rem;
-
+  .fc-event-icon {
+    font-size: 0.7rem;
+  }
   @media (max-width: 768px) {
     font-size: 0.85rem; // Ajuste del tamaño de fuente para pantallas pequeñas
   }

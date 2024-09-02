@@ -16,4 +16,8 @@ export class CitaService extends BaseService<CitaUrls> {
   async reagendar(id: PK, body: any) {
     return (await this.privateApi.put(this.urls.reagendar(id), body)).data;
   }
+
+  async pagar(id: PK) {
+    return (await this.privateApi.put(this.urls.pagar(id))).data;
+  }
 }

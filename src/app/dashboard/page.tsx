@@ -9,6 +9,7 @@ import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
+import classNames from "classnames";
 import { format, isEqual } from "date-fns";
 import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
@@ -18,12 +19,15 @@ import { Tag } from "primereact/tag";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
+const citaService = new CitaService();
+
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
   const blurRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
+
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
     end: null,
@@ -31,7 +35,7 @@ const DashboardPage = () => {
 
   const queryCitas = useQuery(
     ["citas", currentRange],
-    () => new CitaService().listByRange(currentRange.start, currentRange.end),
+    () => citaService.listByRange(currentRange.start, currentRange.end),
     {
       enabled: !!currentRange.start && !!currentRange.end, // Solo habilitar cuando hay un rango definido,
       onSuccess: () => {
@@ -54,7 +58,7 @@ const DashboardPage = () => {
   };
 
   const handleEventDrop = async (info: EventClickArg): Promise<void> => {
-    await new CitaService().reagendar(info.event.id, {
+    await citaService.reagendar(info.event.id, {
       fecha: toBackDate(info.event.start),
       horaInicio: formatToTimeString(info.event.start),
       horaFin: formatToTimeString(info.event.end),
@@ -146,6 +150,12 @@ const DashboardPage = () => {
     };
   }, [currentRange]);
 
+  const handlePagar = async () => {
+    op.current.hide();
+    await citaService.pagar(selectedEvent.id);
+    queryCitas.refetch();
+  };
+
   return (
     <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
       {/* Mostrar el spinner de carga cuando los datos se están cargando */}
@@ -190,13 +200,22 @@ const DashboardPage = () => {
                   rounded
                   href={`/dashboard/cita?action=${CrudActions.UPDATE}&id=${selectedEvent.id}`}
                 />
-                <Button className='mx-1' sm variant='success' icon={PrimeIcons.DOLLAR} rounded />
+                <Button
+                  className='mx-1'
+                  sm
+                  variant='success'
+                  icon={PrimeIcons.DOLLAR}
+                  rounded
+                  onClick={handlePagar}
+                  outlined={selectedEvent?.extendedProps?.isPagada === false}
+                />
                 <Button
                   className='mx-1'
                   sm
                   variant='danger'
                   icon={PrimeIcons.TRASH}
                   rounded
+                  disabled={selectedEvent.extendedProps.isPagada}
                   onClick={() => {
                     // Lógica para eliminar el evento
                   }}
@@ -212,6 +231,11 @@ const DashboardPage = () => {
                 {selectedEvent.extendedProps.estadoLabel}
               </Tag>
             </div>
+            {selectedEvent.extendedProps.isPagada && (
+              <div>
+                <Tag>Pagada</Tag>
+              </div>
+            )}
             <p className='my-1'>
               <strong>Fecha:</strong> {format(selectedEvent.start, "dd/MM/yyy")}
             </p>
@@ -233,6 +257,26 @@ const DashboardPage = () => {
         dateClick={handleSlotClick}
         editable={true} // Habilita el drag and drop
         events={queryCitas?.data || []}
+        eventContent={(renderProps) => {
+          // Aquí puedes crear tu propio contenido personalizado
+          const { event } = renderProps;
+
+          return (
+            <div className='flex h-full'>
+              <div className='fc-event-title'>
+                {event.extendedProps.isPagada && (
+                  <i
+                    className={classNames(
+                      "fc-event-icon border border-round-3xl p-1 bg-green-400 text-white",
+                      PrimeIcons.DOLLAR
+                    )}
+                  />
+                )}
+                {event.title}
+              </div>
+            </div>
+          );
+        }}
         headerToolbar={{
           left: "prev,today,next",
           center: "title",
