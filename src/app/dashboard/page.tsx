@@ -22,12 +22,12 @@ const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
   const blurRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
     end: null,
   });
-  const [triggerRerender, setTriggerRerender] = useState(false); // Estado para forzar re-render
 
   const queryCitas = useQuery(
     ["citas", currentRange],
@@ -95,12 +95,6 @@ const DashboardPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (triggerRerender) {
-      setTriggerRerender(false);
-    }
-  }, [triggerRerender]);
-
   let clickTimeout = null;
 
   const handleSlotClick = (info) => {
@@ -127,6 +121,30 @@ const DashboardPage = () => {
       setCurrentRange(newRange);
     }
   };
+
+  useEffect(() => {
+    const handleDayHeaderClick = (event) => {
+      const target = event.target.closest(".fc-col-header-cell"); // Encuentra el día específico en el header
+      if (target) {
+        const date = target.getAttribute("data-date");
+        if (date && calendarRef.current) {
+          const calendarApi = calendarRef.current.getApi();
+          calendarApi.changeView("timeGridDay", date); // Cambia la vista a día y navega a la fecha
+        }
+      }
+    };
+
+    const dayHeaders = document.querySelectorAll(".fc-col-header-cell");
+    dayHeaders.forEach((header) => {
+      header.addEventListener("click", handleDayHeaderClick);
+    });
+
+    return () => {
+      dayHeaders.forEach((header) => {
+        header.removeEventListener("click", handleDayHeaderClick);
+      });
+    };
+  }, [currentRange]);
 
   return (
     <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
@@ -158,12 +176,12 @@ const DashboardPage = () => {
         }}
       />
 
-      <OverlayPanel style={{ maxWidth: "20rem" }} ref={op} dismissable>
+      <OverlayPanel style={{ maxWidth: "30rem" }} ref={op} dismissable>
         {selectedEvent && (
           <div className='flex flex-column'>
             <div className='flex flex-row align-items-center'>
-              <h4 className='m-0 w-10rem'>{selectedEvent.title}</h4>
-              <div className='flex flex-row w-6rem justify-content-around'>
+              <h4 className='m-0'>{selectedEvent.title}</h4>
+              <div className='flex flex-row w-8rem justify-content-around'>
                 <Button
                   className='mx-1'
                   sm
@@ -172,6 +190,7 @@ const DashboardPage = () => {
                   rounded
                   href={`/dashboard/cita?action=${CrudActions.UPDATE}&id=${selectedEvent.id}`}
                 />
+                <Button className='mx-1' sm variant='success' icon={PrimeIcons.DOLLAR} rounded />
                 <Button
                   className='mx-1'
                   sm
@@ -204,16 +223,14 @@ const DashboardPage = () => {
         )}
       </OverlayPanel>
       <FullCalendar
+        ref={calendarRef}
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView='timeGridWeek' // Vista inicial en el calendario
         locale='es' // Configura el idioma a español
         weekends={true} // Mostrar fines de semana
         eventResizableFromStart={false}
-        // eventResize={false}
         _resize={() => false}
         dateClick={handleSlotClick}
-        // selectLongPressDelay={500}
-        // slotEventOverlap
         editable={true} // Habilita el drag and drop
         events={queryCitas?.data || []}
         headerToolbar={{
