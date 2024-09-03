@@ -1,7 +1,11 @@
 "use client";
 
 import Button from "@/components/Buttons/Button";
+import DeleteRecordConfirm from "@/components/DeleteRecordConfirm";
+import RecordDetail from "@/components/DeleteRecordConfirm/RecordDetail";
+import useDeleteRecordConfirm from "@/components/DeleteRecordConfirm/useDeleteRecordConfirm";
 import { CrudActions } from "@/emuns/crudActions";
+import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { formatToTimeString, toBackDate } from "@/utils/date";
 import { EventClickArg } from "@fullcalendar/core/index.js";
@@ -9,7 +13,6 @@ import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
-import classNames from "classnames";
 import { format, isEqual } from "date-fns";
 import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
@@ -17,6 +20,9 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Tag } from "primereact/tag";
 import { useEffect, useRef, useState } from "react";
+import { FaTasks } from "react-icons/fa";
+import { FaSackDollar } from "react-icons/fa6";
+import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
 
 const citaService = new CitaService();
@@ -32,6 +38,8 @@ const DashboardPage = () => {
     start: null,
     end: null,
   });
+
+  const toast = useToasts();
 
   const queryCitas = useQuery(
     ["citas", currentRange],
@@ -156,6 +164,8 @@ const DashboardPage = () => {
     queryCitas.refetch();
   };
 
+  const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
+
   return (
     <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
       {/* Mostrar el spinner de carga cuando los datos se están cargando */}
@@ -185,7 +195,40 @@ const DashboardPage = () => {
           pointerEvents: "none",
         }}
       />
-
+      <DeleteRecordConfirm
+        ref={deleteRecordRef}
+        messageDetail={(record: EventImpl) => (
+          <RecordDetail
+            title='¿Estas seguro de eliminar esta cita?'
+            items={[
+              ["Paciente", record.title],
+              [
+                "Estado",
+                <Tag
+                  style={{
+                    backgroundColor: selectedEvent.backgroundColor,
+                    color: selectedEvent.textColor,
+                  }}>
+                  {selectedEvent.extendedProps.estadoLabel}
+                </Tag>,
+              ],
+              ["Fecha", format(selectedEvent.start, "dd/MM/yyy")],
+              [
+                "Hora",
+                <div>
+                  {format(selectedEvent.start, "hh:mm a")} {" - "}
+                  {format(selectedEvent.end, "hh:mm a")}
+                </div>,
+              ],
+            ]}
+          />
+        )}
+        onAccept={async (record: EventImpl) => {
+          await citaService.delete(record.id);
+          await queryCitas.refetch();
+          toast.addSuccessToast("Se ha eliminado la cita correctamente");
+        }}
+      />
       <OverlayPanel style={{ maxWidth: "30rem" }} ref={op} dismissable>
         {selectedEvent && (
           <div className='flex flex-column'>
@@ -216,9 +259,7 @@ const DashboardPage = () => {
                   icon={PrimeIcons.TRASH}
                   rounded
                   disabled={selectedEvent.extendedProps.isPagada}
-                  onClick={() => {
-                    // Lógica para eliminar el evento
-                  }}
+                  onClick={deleteEvent(selectedEvent)}
                 />
               </div>
             </div>
@@ -265,13 +306,23 @@ const DashboardPage = () => {
             <div className='flex h-full'>
               <div className='fc-event-title'>
                 {event.extendedProps.isPagada && (
-                  <i
-                    className={classNames(
-                      "fc-event-icon border border-round-3xl p-1 bg-green-400 text-white",
-                      PrimeIcons.DOLLAR
-                    )}
+                  <FaSackDollar style={{ color: event.textColor, fontSize: "0.9rem" }} />
+                )}
+
+                {event.extendedProps.hasNotas && (
+                  <GrNotes
+                    className='mx-1'
+                    style={{ color: event.textColor, fontSize: "0.8rem" }}
                   />
                 )}
+
+                {event.extendedProps.hasTareas && (
+                  <FaTasks
+                    className='mr-1'
+                    style={{ color: event.textColor, fontSize: "0.8rem" }}
+                  />
+                )}
+
                 {event.title}
               </div>
             </div>
