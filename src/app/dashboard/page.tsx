@@ -52,6 +52,7 @@ const DashboardPage = () => {
     }
   );
   let eventClickTimeOut = null;
+
   const handleEventClick = (info: EventClickArg): void => {
     if (eventClickTimeOut) {
       clearTimeout(eventClickTimeOut);
@@ -141,6 +142,8 @@ const DashboardPage = () => {
         const date = target.getAttribute("data-date");
         if (date && calendarRef.current) {
           const calendarApi = calendarRef.current.getApi();
+          const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
+          router.push(window.location.pathname + path);
           calendarApi.changeView("timeGridDay", date); // Cambia la vista a día y navega a la fecha
         }
       }
@@ -165,6 +168,35 @@ const DashboardPage = () => {
   };
 
   const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
+
+  useEffect(() => {
+    const handleOnClickButton = (view: string) => () => {
+      const currentPath = window.location.pathname;
+      router.push(`${currentPath}?view=${view}`);
+    };
+
+    // Selecciona el botón de "Semana" una vez que se haya montado el componente
+    const weekButton = document.querySelector(".fc-timeGridWeek-button");
+    const dayButton = document.querySelector(".fc-timeGridDay-button");
+
+    const handleWeek = handleOnClickButton("timeGridWeek");
+    const handleDay = handleOnClickButton("timeGridDay");
+
+    if (weekButton) {
+      weekButton.addEventListener("click", handleWeek);
+    }
+    if (dayButton) {
+      dayButton.addEventListener("click", handleDay);
+    }
+
+    return () => {
+      if (weekButton) {
+        weekButton.removeEventListener("click", handleWeek);
+        dayButton.removeEventListener("click", handleDay);
+      }
+    };
+  }, [router]);
+
   return (
     <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
       {/* Mostrar el spinner de carga cuando los datos se están cargando */}

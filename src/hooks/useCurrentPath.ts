@@ -1,13 +1,13 @@
-import { useRouter } from 'next/router';
-import { useMemo } from 'react';
+import { usePathname, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 const useCurrentPath = () => {
-  const { asPath } = useRouter();
+  const pathname = usePathname();
+  const search = useSearchParams();
 
   const currentPath = useMemo(() => {
-    const [pathname, search] = asPath.split('?');
     return search ? `${pathname}?${search}` : pathname;
-  }, [asPath]);
+  }, [pathname, search]);
 
   return {
     currentPath,
