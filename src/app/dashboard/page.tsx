@@ -350,17 +350,11 @@ const DashboardPage = () => {
                 )}
 
                 {event.extendedProps.hasNotas && (
-                  <GrNotes
-                    className='mx-1'
-                    style={{ color: event.textColor, fontSize: "0.8rem" }}
-                  />
+                  <GrNotes style={{ color: event.textColor, fontSize: "0.8rem" }} />
                 )}
 
                 {event.extendedProps.hasTareas && (
-                  <FaTasks
-                    className='mr-1'
-                    style={{ color: event.textColor, fontSize: "0.8rem" }}
-                  />
+                  <FaTasks style={{ color: event.textColor, fontSize: "0.8rem" }} />
                 )}
 
                 {event.title}
