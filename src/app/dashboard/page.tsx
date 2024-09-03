@@ -205,6 +205,7 @@ const DashboardPage = () => {
               [
                 "Estado",
                 <Tag
+                  key={record.id}
                   style={{
                     backgroundColor: record.backgroundColor,
                     color: record.textColor,
@@ -215,7 +216,7 @@ const DashboardPage = () => {
               ["Fecha", format(record.start, "dd/MM/yyy")],
               [
                 "Hora",
-                <div>
+                <div key={record.id}>
                   {format(record.start, "hh:mm a")} {" - "}
                   {format(record.end, "hh:mm a")}
                 </div>,
