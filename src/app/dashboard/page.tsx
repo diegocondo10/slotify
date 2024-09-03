@@ -14,7 +14,7 @@ import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
 import { format, isEqual } from "date-fns";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -134,7 +134,7 @@ const DashboardPage = () => {
       setCurrentRange(newRange);
     }
   };
-
+  const search = useSearchParams();
   useEffect(() => {
     const handleDayHeaderClick = (event) => {
       const target = event.target.closest(".fc-col-header-cell"); // Encuentra el día específico en el header
@@ -196,7 +196,13 @@ const DashboardPage = () => {
       }
     };
   }, [router]);
-
+  useEffect(() => {
+    const view = search.get("view") || "timeGridWeek";
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.changeView(view);
+    }
+  }, [search]);
   return (
     <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
       {/* Mostrar el spinner de carga cuando los datos se están cargando */}
