@@ -165,7 +165,6 @@ const DashboardPage = () => {
   };
 
   const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
-
   return (
     <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
       {/* Mostrar el spinner de carga cuando los datos se están cargando */}
@@ -195,6 +194,7 @@ const DashboardPage = () => {
           pointerEvents: "none",
         }}
       />
+
       <DeleteRecordConfirm
         ref={deleteRecordRef}
         messageDetail={(record: EventImpl) => (
@@ -206,18 +206,18 @@ const DashboardPage = () => {
                 "Estado",
                 <Tag
                   style={{
-                    backgroundColor: selectedEvent.backgroundColor,
-                    color: selectedEvent.textColor,
+                    backgroundColor: record.backgroundColor,
+                    color: record.textColor,
                   }}>
-                  {selectedEvent.extendedProps.estadoLabel}
+                  {record.extendedProps.estadoLabel}
                 </Tag>,
               ],
-              ["Fecha", format(selectedEvent.start, "dd/MM/yyy")],
+              ["Fecha", format(record.start, "dd/MM/yyy")],
               [
                 "Hora",
                 <div>
-                  {format(selectedEvent.start, "hh:mm a")} {" - "}
-                  {format(selectedEvent.end, "hh:mm a")}
+                  {format(record.start, "hh:mm a")} {" - "}
+                  {format(record.end, "hh:mm a")}
                 </div>,
               ],
             ]}
@@ -229,6 +229,7 @@ const DashboardPage = () => {
           toast.addSuccessToast("Se ha eliminado la cita correctamente");
         }}
       />
+
       <OverlayPanel style={{ maxWidth: "30rem" }} ref={op} dismissable>
         {selectedEvent && (
           <div className='flex flex-column'>
