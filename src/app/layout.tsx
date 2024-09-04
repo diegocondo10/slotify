@@ -40,6 +40,7 @@ export default async function RootLayout({
         <meta httpEquiv='Content-Language' content='es' />
         <meta name='google' content='notranslate' />
         <meta name='theme-color' content='#317EFB' />
+        <script src='https://kit.fontawesome.com/49a17ce65c.js' crossOrigin='anonymous' async />
       </head>
       <body className={roboto.className}>
         <QueryClientContextProvider>

@@ -42,6 +42,15 @@
   }
 }
 
+.fc-button {
+  background-color: #4e85cc !important;
+  border-color: #4179c2 !important;
+  &:focus {
+    background-color: #4c7dbc !important;
+    border-color: #4c7dbc !important;
+  }
+}
+
 .fc-toolbar-title {
   font-size: 1.5rem !important;
   text-align: center !important;
@@ -54,4 +63,8 @@
 }
 .fc-scrollgrid-sync-inner {
   cursor: pointer;
+}
+
+.fc-icon-fa {
+  font-family: FontAwesome;
 }

@@ -188,14 +188,21 @@ const DashboardPage = () => {
     if (dayButton) {
       dayButton.addEventListener("click", handleDay);
     }
-
+    const reloadButton = document.querySelector(".fc-customReload-button");
+    if (reloadButton) {
+      const iconElement = document.createElement("i");
+      iconElement.classList.add("fa", "fa-solid", "fa-rotate");
+      reloadButton.innerHTML = "";
+      reloadButton.appendChild(iconElement);
+    }
     return () => {
       if (weekButton) {
         weekButton.removeEventListener("click", handleWeek);
         dayButton.removeEventListener("click", handleDay);
       }
     };
-  }, [router]);
+  }, []);
+
   useEffect(() => {
     const view = search.get("view") || "timeGridWeek";
     if (calendarRef.current) {
@@ -374,7 +381,6 @@ const DashboardPage = () => {
         }}
         customButtons={{
           customReload: {
-            text: "Recargar",
             click: () => {
               queryCitas.refetch();
             },
