@@ -8,18 +8,20 @@ import TextInput from "@/components/Forms/TextInput";
 import Loading from "@/components/Loading";
 import PageTitle from "@/components/pages/PageTitle";
 import { REQUIRED_MSG } from "@/constants/rules";
+import { CrudActions } from "@/emuns/crudActions";
 import useCreateUpdate from "@/hooks/useCreateUpdate";
 import useToasts from "@/hooks/useToasts";
 import { ClienteService } from "@/services/clientes/clientes.service";
 import { toBackDate, toFrontDate } from "@/utils/date";
 import { useRouter } from "next/navigation";
 import { Card } from "primereact/card";
+import { InputText } from "primereact/inputtext";
 import { FormProvider, useForm } from "react-hook-form";
 import { useQuery } from "react-query";
 
 const ClientesForm = ({ params, searchParams }) => {
   const id = searchParams.id;
-
+  const isUpdate = params.action === CrudActions.UPDATE;
   const methods = useForm({
     mode: "onChange",
   });
@@ -113,6 +115,17 @@ const ClientesForm = ({ params, searchParams }) => {
                   )}
                 />
               </div>
+              {isUpdate && (
+                <div className='field col-12'>
+                  <label htmlFor='fullName'>Nombre Completo:</label>
+                  <InputText
+                    className='w-full text-center font-bold'
+                    style={{ color: "black", opacity: 0.9 }}
+                    disabled
+                    defaultValue={retrieveQuery?.data?.data?.fullName}
+                  />
+                </div>
+              )}
               <div className='field col-12 md:col-5'>
                 <FormFieldRender
                   name='firstName'
