@@ -9,7 +9,7 @@ import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { formatToTimeString, toBackDate } from "@/utils/date";
 import { createClickHandler, simulateTouch } from "@/utils/events";
-import { DatePointApi, EventClickArg } from "@fullcalendar/core/index.js";
+import { DatePointApi, DatesSetArg, EventClickArg } from "@fullcalendar/core/index.js";
 import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
@@ -75,7 +75,7 @@ const DashboardPage = () => {
     router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}`);
   });
 
-  const handleDatesSet = (dateInfo) => {
+  const handleDatesSet = (dateInfo: DatesSetArg) => {
     const newRange = {
       start: dateInfo?.start,
       end: dateInfo?.end,
@@ -88,7 +88,7 @@ const DashboardPage = () => {
   const search = useSearchParams();
 
   useEffect(() => {
-    const handleDayHeaderClick = (event) => {
+    const handleDayHeaderClick = createClickHandler((event: any) => {
       const target = event.target.closest(".fc-col-header-cell");
       if (target) {
         const date = target.getAttribute("data-date");
@@ -99,18 +99,17 @@ const DashboardPage = () => {
           calendarApi.changeView("timeGridDay", date);
         }
       }
-    };
+    });
 
     const dayHeaders = document.querySelectorAll(".fc-col-header-cell");
+
     dayHeaders.forEach((header) => {
-      // header.addEventListener("click", handleDayHeaderClick);
-      header.addEventListener("dblclick", handleDayHeaderClick);
+      header.addEventListener("click", handleDayHeaderClick);
     });
 
     return () => {
       dayHeaders.forEach((header) => {
-        // header.removeEventListener("click", handleDayHeaderClick);
-        header.removeEventListener("dblclick", handleDayHeaderClick);
+        header.removeEventListener("click", handleDayHeaderClick);
       });
     };
   }, [currentRange]);
