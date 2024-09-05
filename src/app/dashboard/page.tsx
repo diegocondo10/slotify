@@ -8,7 +8,8 @@ import { CrudActions } from "@/emuns/crudActions";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { formatToTimeString, toBackDate } from "@/utils/date";
-import { EventClickArg } from "@fullcalendar/core/index.js";
+import { createClickHandler, simulateTouch } from "@/utils/events";
+import { DatePointApi, EventClickArg } from "@fullcalendar/core/index.js";
 import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
@@ -51,20 +52,12 @@ const DashboardPage = () => {
       },
     }
   );
-  let eventClickTimeOut = null;
 
-  const handleEventClick = (info: EventClickArg): void => {
-    if (eventClickTimeOut) {
-      clearTimeout(eventClickTimeOut);
-      //@ts-ignore
-      op.current.toggle(info.jsEvent, info.el);
-      setSelectedEvent(info.event);
-    } else {
-      eventClickTimeOut = setTimeout(() => {
-        eventClickTimeOut = null;
-      }, 300);
-    }
-  };
+  const handleEventClick = createClickHandler<EventClickArg>((info: EventClickArg) => {
+    //@ts-ignore
+    op.current.toggle(info.jsEvent, info.el);
+    setSelectedEvent(info.event);
+  });
 
   const handleEventDrop = async (info: EventClickArg): Promise<void> => {
     await citaService.reagendar(info.event.id, {
@@ -74,55 +67,13 @@ const DashboardPage = () => {
     });
     queryCitas.refetch();
 
-    if (blurRef.current) {
-      const touch = new Touch({
-        identifier: Date.now(),
-        target: blurRef.current,
-        clientX: blurRef.current.getBoundingClientRect().left,
-        clientY: blurRef.current.getBoundingClientRect().top,
-        pageX: blurRef.current.getBoundingClientRect().left + window.scrollX,
-        pageY: blurRef.current.getBoundingClientRect().top + window.scrollY,
-        screenX: blurRef.current.getBoundingClientRect().left,
-        screenY: blurRef.current.getBoundingClientRect().top,
-        radiusX: 0,
-        radiusY: 0,
-        rotationAngle: 0,
-        force: 1,
-      });
-
-      const touchStartEvent = new TouchEvent("touchstart", {
-        bubbles: true,
-        cancelable: true,
-        touches: [touch],
-      });
-
-      const touchEndEvent = new TouchEvent("touchend", {
-        bubbles: true,
-        cancelable: true,
-        touches: [touch],
-      });
-
-      // Despacha los eventos táctiles en el elemento referenciado por blurRef
-      blurRef.current.dispatchEvent(touchStartEvent);
-      blurRef.current.dispatchEvent(touchEndEvent);
-    }
+    simulateTouch(blurRef.current);
   };
 
-  let clickTimeout = null;
-
-  const handleSlotClick = (info) => {
-    if (clickTimeout) {
-      clearTimeout(clickTimeout);
-      clickTimeout = null;
-
-      const fecha = encodeURIComponent(info.date.toISOString());
-      router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}`);
-    } else {
-      clickTimeout = setTimeout(() => {
-        clickTimeout = null;
-      }, 300);
-    }
-  };
+  const handleSlotClick = createClickHandler((info: DatePointApi) => {
+    const fecha = encodeURIComponent(info.date.toISOString());
+    router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}`);
+  });
 
   const handleDatesSet = (dateInfo) => {
     const newRange = {
@@ -135,28 +86,31 @@ const DashboardPage = () => {
     }
   };
   const search = useSearchParams();
+
   useEffect(() => {
     const handleDayHeaderClick = (event) => {
-      const target = event.target.closest(".fc-col-header-cell"); // Encuentra el día específico en el header
+      const target = event.target.closest(".fc-col-header-cell");
       if (target) {
         const date = target.getAttribute("data-date");
         if (date && calendarRef.current) {
           const calendarApi = calendarRef.current.getApi();
           const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
           router.push(window.location.pathname + path);
-          calendarApi.changeView("timeGridDay", date); // Cambia la vista a día y navega a la fecha
+          calendarApi.changeView("timeGridDay", date);
         }
       }
     };
 
     const dayHeaders = document.querySelectorAll(".fc-col-header-cell");
     dayHeaders.forEach((header) => {
-      header.addEventListener("click", handleDayHeaderClick);
+      // header.addEventListener("click", handleDayHeaderClick);
+      header.addEventListener("dblclick", handleDayHeaderClick);
     });
 
     return () => {
       dayHeaders.forEach((header) => {
-        header.removeEventListener("click", handleDayHeaderClick);
+        // header.removeEventListener("click", handleDayHeaderClick);
+        header.removeEventListener("dblclick", handleDayHeaderClick);
       });
     };
   }, [currentRange]);
@@ -175,7 +129,6 @@ const DashboardPage = () => {
       router.push(`${currentPath}?view=${view}`);
     };
 
-    // Selecciona el botón de "Semana" una vez que se haya montado el componente
     const weekButton = document.querySelector(".fc-timeGridWeek-button");
     const dayButton = document.querySelector(".fc-timeGridDay-button");
 
@@ -210,9 +163,9 @@ const DashboardPage = () => {
       calendarApi.changeView(view);
     }
   }, [search]);
+
   return (
     <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
-      {/* Mostrar el spinner de carga cuando los datos se están cargando */}
       {queryCitas.isFetching && (
         <div
           style={{
