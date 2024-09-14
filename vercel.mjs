@@ -14,8 +14,8 @@ if (!apiBaseUrl) {
 const vercelConfig = {
   rewrites: [
     {
-      source: "/v1/:path*",
-      destination: `${apiBaseUrl}:path*`,
+      source: "/v1/(.*)",
+      destination: `${apiBaseUrl}$1/`,
     },
   ],
 };
