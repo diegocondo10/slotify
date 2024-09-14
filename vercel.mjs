@@ -14,8 +14,8 @@ if (!apiBaseUrl) {
 const vercelConfig = {
   rewrites: [
     {
-      source: "/v1/:path*", // Cambia el patrón para capturar cualquier cosa después de /v1/
-      destination: `${apiBaseUrl}/api/v1/:path*`, // Añade /api/v1/ en el destino
+      source: "/v1/(.*)", // Cambia el patrón para capturar cualquier cosa después de /v1/
+      destination: `${apiBaseUrl}/api/v1/$1/`, // Añade /api/v1/ en el destino
     },
   ],
 };
