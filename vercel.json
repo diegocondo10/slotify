@@ -1,0 +1,9 @@
+{
+    "rewrites": [
+      {
+        "source": "/v1/(.*)",
+        "destination": "@next_public_api_base_url_server/$1/"
+      }
+    ]
+  }
+  
