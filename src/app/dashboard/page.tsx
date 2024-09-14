@@ -31,6 +31,7 @@ const citaService = new CitaService();
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
+
   const blurRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
@@ -88,7 +89,7 @@ const DashboardPage = () => {
   const search = useSearchParams();
 
   useEffect(() => {
-    const handleDayHeaderClick = createClickHandler((event: any) => {
+    const onDobleClickDayHeader = (event: any) => {
       const target = event.target.closest(".fc-col-header-cell");
       if (target) {
         const date = target.getAttribute("data-date");
@@ -99,7 +100,15 @@ const DashboardPage = () => {
           calendarApi.changeView("timeGridDay", date);
         }
       }
-    });
+    };
+
+    const onOneClickDayHeader = (event: PointerEvent) => {
+      const targetElement = event.target as HTMLElement;
+      const thElement = targetElement.closest("th");
+      const fecha = thElement.dataset?.date;
+    };
+
+    const handleDayHeaderClick = createClickHandler(onDobleClickDayHeader, onOneClickDayHeader);
 
     const dayHeaders = document.querySelectorAll(".fc-col-header-cell");
 
