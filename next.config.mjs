@@ -22,7 +22,7 @@ const nextConfig = {
       {
         source: "/v1/:path*",
         destination: `${process.env.NEXT_PUBLIC_API_BASE_URL_SERVER}:path*`,
-        permanent: true,
+        permanent: false,
       },
     ];
   },
