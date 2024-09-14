@@ -15,7 +15,7 @@ const vercelConfig = {
   rewrites: [
     {
       source: "/v1/(.*)",
-      destination: "http://83.147.38.11/api/v1/$1/",
+      destination: `${apiBaseUrl}$1/`,
     },
   ],
 };
