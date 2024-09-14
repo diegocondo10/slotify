@@ -13,19 +13,6 @@ const nextConfig = {
   },
   reactStrictMode: false,
   compress: true,
-  async redirects() {
-    if (isDev) {
-      return [];
-    }
-
-    return [
-      {
-        source: "/v1/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL_SERVER}:path*`,
-        permanent: false,
-      },
-    ];
-  },
 };
 
 export default withPWA({

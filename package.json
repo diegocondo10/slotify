@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_OPTIONS='--inspect'  next dev -p 4560",
+    "pre-build": "node vercel.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
