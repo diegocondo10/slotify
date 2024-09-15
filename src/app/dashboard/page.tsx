@@ -288,6 +288,8 @@ const DashboardPage = () => {
       </OverlayPanel>
       <FullCalendar
         ref={calendarRef}
+        nowIndicator
+        // nowIndicatorClassNames="fc-timegrid-now-indicator-line"
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView='timeGridWeek' // Vista inicial en el calendario
         locale='es' // Configura el idioma a español

@@ -68,3 +68,27 @@
 .fc-icon-fa {
   font-family: FontAwesome;
 }
+
+.fc-timegrid-now-indicator-container {
+  overflow: visible !important;
+  .fc-timegrid-now-indicator-arrow {
+    &::before,
+    &::after {
+      content: "";
+      width: 100vw !important;
+      border-style: solid;
+      border-width: 1px 0 0px;
+      position: absolute;
+      top: -0.48px;
+      border-color: rgb(252, 127, 3) !important;
+    }
+
+    &::before {
+      right: 100%;
+    }
+
+    &::after {
+      left: 100%;
+    }
+  }
+}
