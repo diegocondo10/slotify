@@ -42,7 +42,7 @@ const DashboardPage = () => {
 
   const toast = useToasts();
 
-  const queryCitas = useQuery(
+  const queryCitas = useQuery<any[]>(
     ["citas", currentRange],
     () => citaService.listByRange(currentRange.start, currentRange.end),
     {
@@ -60,13 +60,62 @@ const DashboardPage = () => {
   });
 
   const handleEventDrop = async (info: EventClickArg): Promise<void> => {
+    const oldEvent = queryCitas?.data.find((event) => +event.id === +info.event.id);
+
     await citaService.reagendar(info.event.id, {
       fecha: toBackDate(info.event.start),
       horaInicio: formatToTimeString(info.event.start),
       horaFin: formatToTimeString(info.event.end),
     });
-    queryCitas.refetch();
-
+    await queryCitas.refetch();
+    toast.jsxToast(
+      (t) => (
+        <div className='flex flex-row text-sm'>
+          <div className='align-self-center'>
+            <Button
+              className='text-white'
+              text
+              label='OK'
+              outlined={false}
+              onClick={() => toast.dismiss(t.id)}
+            />
+          </div>
+          <div>
+            Se movio a <strong>{info.event.title}</strong> de:
+            <br />
+            {format(oldEvent.start, "EEEE dd 'a las' hh:mm a")}
+            <br /> a <br />
+            {format(info.event.start, "EEEE dd 'a las' hh:mm a")}
+          </div>
+          <div className='align-self-center'>
+            <Button
+              className='text-white'
+              text
+              outlined={false}
+              label='Deshacer'
+              onClick={async () => {
+                toast.dismiss(t.id);
+                await citaService.reagendar(info.event.id, {
+                  fecha: toBackDate(oldEvent.start),
+                  horaInicio: formatToTimeString(oldEvent.start),
+                  horaFin: formatToTimeString(oldEvent.end),
+                });
+                await queryCitas.refetch();
+              }}
+            />
+          </div>
+        </div>
+      ),
+      {
+        position: "bottom-center",
+        duration: 7000,
+        style: {
+          backgroundColor: "black",
+          color: "white",
+          minWidth: "20rem",
+        },
+      }
+    );
     simulateTouch(blurRef.current);
   };
 

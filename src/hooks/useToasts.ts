@@ -7,6 +7,9 @@ type ToastTypeFunction = (content: Message, opts?: ToastOptions) => void;
 export interface UseToastsProps {
   addSuccessToast: ToastTypeFunction;
   addErrorToast: ToastTypeFunction;
+  jsxToast: (content: (t?: Toast) => any, opts?: ToastOptions) => any;
+  dismiss(toastId?: string): void;
+  remove(toastId?: string): void;
 }
 
 const useToasts = (): UseToastsProps => {
@@ -20,6 +23,9 @@ const useToasts = (): UseToastsProps => {
   return {
     addSuccessToast: addToast("success"),
     addErrorToast: addToast("error"),
+    jsxToast: (content, options) => toast((t) => content(t), options),
+    dismiss: toast.dismiss,
+    remove: toast.remove,
   };
 };
 
