@@ -25,12 +25,14 @@ import { FaTasks } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
+import OverlayPanelNotas from "./components/OverlayPanelNotas";
 
 const citaService = new CitaService();
 
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
+  const opNotas = useRef<OverlayPanel>(null);
   const blurRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
@@ -132,21 +134,32 @@ const DashboardPage = () => {
       setCurrentRange(newRange);
     }
   };
+
   const search = useSearchParams();
 
   useEffect(() => {
-    const handleDayHeaderClick = createClickHandler((event: any) => {
+    const getDateFromHeader = (event: any) => {
       const target = event.target.closest(".fc-col-header-cell");
-      if (target) {
-        const date = target.getAttribute("data-date");
-        if (date && calendarRef.current) {
-          const calendarApi = calendarRef.current.getApi();
-          const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
-          router.push(window.location.pathname + path);
-          calendarApi.changeView("timeGridDay", date);
-        }
+      return target.getAttribute("data-date");
+    };
+
+    const onDoubleClickDayHeader = (event: any) => {
+      const date = getDateFromHeader(event);
+      if (date && calendarRef.current) {
+        const calendarApi = calendarRef.current.getApi();
+        const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
+        router.push(window.location.pathname + path);
+        calendarApi.changeView("timeGridDay", date);
       }
-    });
+    };
+
+    const onOneClickDayHeader = (event: any) => {
+      const date = getDateFromHeader(event);
+      //@ts-ignore
+      opNotas.current.toggle(event);
+    };
+
+    const handleDayHeaderClick = createClickHandler(onDoubleClickDayHeader, onOneClickDayHeader);
 
     const dayHeaders = document.querySelectorAll(".fc-col-header-cell");
 
@@ -333,6 +346,9 @@ const DashboardPage = () => {
           </div>
         )}
       </OverlayPanel>
+
+      <OverlayPanelNotas refOp={opNotas} />
+
       <FullCalendar
         ref={calendarRef}
         nowIndicator
