@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/v1/(.*)",
-            "destination": "http://83.147.38.11:9880/api/v1/$1/"
+            "destination": "${NEXT_PUBLIC_API_BASE_URL_SERVER}$1/"
         }
     ]
 }
