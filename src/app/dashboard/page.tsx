@@ -71,8 +71,13 @@ const DashboardPage = () => {
     toast.jsxToast(
       (t) => (
         <div className='flex flex-row text-sm'>
-          <div className='align-self-center'>
-            <Button className='text-white' label='OK' onClick={() => toast.dismiss(t.id)} />
+          <div className='align-self-center mr-3 text-center'>
+            <Button
+              className='text-white'
+              label='OK'
+              size='large'
+              onClick={() => toast.dismiss(t.id)}
+            />
           </div>
           <div>
             Se movio a <strong>{info.event.title}</strong> de:
@@ -81,10 +86,11 @@ const DashboardPage = () => {
             <br /> a <br />
             {format(info.event.start, "EEEE dd 'a las' hh:mm a")}
           </div>
-          <div className='align-self-center'>
+          <div className='align-self-center ml-3 text-center'>
             <Button
               className='text-white'
               label='Deshacer'
+              size='large'
               onClick={async () => {
                 toast.dismiss(t.id);
                 await citaService.reagendar(info.event.id, {
@@ -102,9 +108,9 @@ const DashboardPage = () => {
         position: "bottom-center",
         duration: 7000,
         style: {
-          backgroundColor: "black",
+          backgroundColor: "#494949",
           color: "white",
-          minWidth: "20rem",
+          minWidth: "30rem",
         },
       }
     );
