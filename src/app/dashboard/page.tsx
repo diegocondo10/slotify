@@ -36,6 +36,7 @@ const DashboardPage = () => {
   const blurRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
+  const [selectedDateHeader, setSelectedDateHeader] = useState<string>(null);
 
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
@@ -51,6 +52,7 @@ const DashboardPage = () => {
       enabled: !!currentRange.start && !!currentRange.end, // Solo habilitar cuando hay un rango definido,
       onSuccess: () => {
         op.current.hide();
+        opNotas.current.hide();
       },
     }
   );
@@ -144,6 +146,7 @@ const DashboardPage = () => {
     };
 
     const onDoubleClickDayHeader = (event: any) => {
+      opNotas.current.hide();
       const date = getDateFromHeader(event);
       if (date && calendarRef.current) {
         const calendarApi = calendarRef.current.getApi();
@@ -153,8 +156,9 @@ const DashboardPage = () => {
       }
     };
 
-    const onOneClickDayHeader = (event: any) => {
+    const onOneClickDayHeader = async (event: any) => {
       const date = getDateFromHeader(event);
+      setSelectedDateHeader(date);
       //@ts-ignore
       opNotas.current.toggle(event);
     };
@@ -347,7 +351,11 @@ const DashboardPage = () => {
         )}
       </OverlayPanel>
 
-      <OverlayPanelNotas refOp={opNotas} />
+      <OverlayPanelNotas
+        refOp={opNotas}
+        setSelectedDateHeader={setSelectedDateHeader}
+        selectedDateHeader={selectedDateHeader}
+      />
 
       <FullCalendar
         ref={calendarRef}

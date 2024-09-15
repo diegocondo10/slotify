@@ -2,7 +2,8 @@ import { PK } from "@/types/api";
 import { BaseURLs } from "../types";
 
 export interface NotasUrls extends BaseURLs {
-  listByDate: (fecha: string) => string;
+  oneByDate: (fecha: string) => string;
+  createOrUpdate: (fecha: string) => string;
 }
 
 export const NOTAS_URLS: NotasUrls = {
@@ -11,5 +12,6 @@ export const NOTAS_URLS: NotasUrls = {
   delete: (id: PK) => `notas/${id}/`,
   retrieve: (id: PK) => `notas/${id}/`,
   update: (id: PK) => `notas/${id}/`,
-  listByDate: (fecha: String) => `notas/list-by-date/${fecha}/`,
+  oneByDate: (fecha: string) => `notas/one-by-date/${fecha}/`,
+  createOrUpdate: (fecha: string) => `notas/create-or-update/${fecha}/`,
 };

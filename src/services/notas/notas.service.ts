@@ -5,7 +5,10 @@ export class NotaService extends BaseService<NotasUrls> {
   getUrls(): NotasUrls {
     return NOTAS_URLS;
   }
-  async listByDate(fecha: string) {
-    return (await this.privateApi.get(this.urls.listByDate(fecha))).data;
+  async oneByDate(fecha: string) {
+    return (await this.privateApi.get(this.urls.oneByDate(fecha))).data;
+  }
+  async creteOrUpdate(fecha: string, data: any) {
+    return (await this.privateApi.post(this.urls.createOrUpdate(fecha), data)).data;
   }
 }

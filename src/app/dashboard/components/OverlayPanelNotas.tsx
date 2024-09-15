@@ -2,23 +2,72 @@
 import Button from "@/components/Buttons/Button";
 import FormFieldRender from "@/components/Forms/FormFieldRender";
 import TextArea from "@/components/Forms/TextArea";
+import Loading from "@/components/Loading";
+import { NotaService } from "@/services/notas/notas.service";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { MutableRefObject } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useQuery } from "react-query";
 
-const OverlayPanelNotas = ({ refOp }: { refOp: MutableRefObject<OverlayPanel> }) => {
+const notasService = new NotaService();
+
+const OverlayPanelNotas = ({
+  refOp,
+  selectedDateHeader,
+  setSelectedDateHeader,
+}: {
+  refOp: MutableRefObject<OverlayPanel>;
+  selectedDateHeader: string;
+  setSelectedDateHeader: Dispatch<SetStateAction<string>>;
+}) => {
   const methods = useForm({ mode: "onChange" });
+  const [guardando, setGuardando] = useState(false);
+  const queryNota = useQuery(
+    [selectedDateHeader, "nota"],
+    () => notasService.oneByDate(selectedDateHeader),
+    {
+      enabled: selectedDateHeader !== null,
+      onSuccess: (data) => {
+        methods.reset(data);
+      },
+    }
+  );
+
+  const onSubmit = async (formData) => {
+    setGuardando(true);
+    console.log(formData);
+    await notasService.creteOrUpdate(selectedDateHeader, { descripcion: formData.descripcion });
+    setSelectedDateHeader(null);
+    setGuardando(false);
+  };
 
   return (
-    <OverlayPanel style={{ maxWidth: "30rem", minWidth: "20rem" }} ref={refOp}>
-      <FormProvider {...methods}>
-        <FormFieldRender
-          label='Notas diarias: '
-          name='notasDiarias'
-          render={({ name }) => <TextArea controller={{ name }} block rows={5} />}
-        />
-        <Button block label='Guardar' />
-      </FormProvider>
+    <OverlayPanel className='mx-auto' style={{ maxWidth: "30rem", minWidth: "20rem" }} ref={refOp}>
+      {queryNota.isFetching && <Loading loading />}
+
+      {!queryNota.isFetching && (
+        <FormProvider {...methods}>
+          <FormFieldRender
+            label='Notas diarias: '
+            name='descripcion'
+            render={({ name }) => (
+              <TextArea
+                className='my-2'
+                disabled={guardando}
+                controller={{ name }}
+                block
+                rows={20}
+              />
+            )}
+          />
+          <Button
+            block
+            label='Guardar'
+            loading={guardando}
+            onClick={methods.handleSubmit(onSubmit)}
+          />
+        </FormProvider>
+      )}
     </OverlayPanel>
   );
 };
