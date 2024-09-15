@@ -72,13 +72,7 @@ const DashboardPage = () => {
       (t) => (
         <div className='flex flex-row text-sm'>
           <div className='align-self-center'>
-            <Button
-              className='text-white'
-              text
-              label='OK'
-              outlined={false}
-              onClick={() => toast.dismiss(t.id)}
-            />
+            <Button className='text-white' label='OK' onClick={() => toast.dismiss(t.id)} />
           </div>
           <div>
             Se movio a <strong>{info.event.title}</strong> de:
@@ -90,8 +84,6 @@ const DashboardPage = () => {
           <div className='align-self-center'>
             <Button
               className='text-white'
-              text
-              outlined={false}
               label='Deshacer'
               onClick={async () => {
                 toast.dismiss(t.id);
