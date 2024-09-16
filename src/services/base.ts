@@ -10,6 +10,9 @@ export abstract class BaseService<T extends BaseURLs> {
   private _publicApi: AxiosInstance;
   public urls: T;
 
+  private static cachedSession = null; // Variable estática para cachear la sesión
+  private static sessionExpiryTime = null; // Variable para almacenar la expiración de la sesión
+
   constructor(props: InstanceServiceProps = null) {
     this._privateApi = createApi();
     this._publicApi = createApi();
@@ -23,9 +26,20 @@ export abstract class BaseService<T extends BaseURLs> {
             config.headers.Authorization = `Bearer ${props.token}`;
           }
         } else {
-          const session = await getSession();
-          if (session?.accessToken) {
-            config.headers.Authorization = `Bearer ${session.accessToken}`;
+          // Comprobamos si la sesión está en cache y si aún es válida
+          const currentTime = new Date().getTime();
+          if (!BaseService.cachedSession || currentTime > BaseService.sessionExpiryTime) {
+            const session = await getSession(); // Solo obtenemos la sesión si no está en cache o ha expirado
+            if (session) {
+              BaseService.cachedSession = session;
+              // Asumimos que la sesión es válida por 1 hora (3600 * 1000 ms)
+              BaseService.sessionExpiryTime = currentTime + 3600 * 1000; // Actualizar tiempo de expiración
+            }
+          }
+
+          // Si tenemos un token de acceso en la sesión cacheada, lo usamos
+          if (BaseService.cachedSession?.accessToken) {
+            config.headers.Authorization = `Bearer ${BaseService.cachedSession.accessToken}`;
           }
         }
         return config;

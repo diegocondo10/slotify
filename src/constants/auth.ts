@@ -60,12 +60,15 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+
   pages: {
     signIn: "/login",
     error: "/error",
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // Un mes
+    updateAge: 24 * 60 * 60, // Cada 24 horas
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
