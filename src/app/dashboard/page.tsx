@@ -244,7 +244,7 @@ const DashboardPage = () => {
       const viewportHeight = window.innerHeight;
       const navbarHeight = document.querySelector("#navbar")?.clientHeight || 0;
       const summaryToolbarHeight = document.querySelector("#summary_toolbar")?.clientHeight || 0;
-      const extraHeigh = isPwaInIOS() ? 30 : 10;
+      const extraHeigh = isPwaInIOS() ? 20 : 10;
       setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeigh));
     };
 
@@ -376,6 +376,16 @@ const DashboardPage = () => {
               <strong>Hora:</strong> {format(selectedEvent.start, "hh:mm a")} {" - "}
               {format(selectedEvent.end, "hh:mm a")}
             </p>
+            {selectedEvent.extendedProps.hasNotas && (
+              <p className='my-1'>
+                <strong>Notas:</strong> {selectedEvent.extendedProps?.notas}
+              </p>
+            )}
+            {selectedEvent.extendedProps.hasTareas && (
+              <p className='my-1'>
+                <strong>Tareas:</strong> {selectedEvent.extendedProps?.tareas}
+              </p>
+            )}
           </div>
         )}
       </OverlayPanel>
