@@ -146,7 +146,8 @@ const DashboardPage = () => {
   };
 
   const search = useSearchParams();
-
+  const isWeekView = search.get("view") === "timeGridWeek";
+  
   useEffect(() => {
     const getDateFromHeader = (event: any) => {
       const target = event.target.closest(".fc-col-header-cell");
@@ -442,23 +443,25 @@ const DashboardPage = () => {
         longPressDelay={300} // Reduce el tiempo necesario para empezar a arrastrar en dispositivos móviles
         dragScroll={true} // Permite que la vista se desplace mientras arrastras un evento
       />
-      <div className='grid-sumary-container'>
-        <div className='grid-sumary-item text-center py-2'>
-          <p className='p-0 m-0 text-sm'>Confirmados</p>
-        </div>
-        {Object.entries(summary).map(([key, value]) => (
-          <div className='grid-sumary-item flex flex-column justify-content-around' key={key}>
-            {Object.entries(value).map(([codigoEstado, sumario]) => (
-              <Tag
-                key={key + codigoEstado}
-                className='text-left'
-                style={{ backgroundColor: sumario.color, color: sumario.textColor }}>
-                {sumario.total}
-              </Tag>
-            ))}
+      {isWeekView && (
+        <div className='grid-sumary-container'>
+          <div className='grid-sumary-item text-center py-2'>
+            <p className='p-0 m-0 text-sm'>Confirmados</p>
           </div>
-        ))}
-      </div>
+          {Object.entries(summary).map(([key, value]) => (
+            <div className='grid-sumary-item flex flex-column justify-content-around' key={key}>
+              {Object.entries(value).map(([codigoEstado, sumario]) => (
+                <Tag
+                  key={key + codigoEstado}
+                  className='text-left'
+                  style={{ backgroundColor: sumario.color, color: sumario.textColor }}>
+                  {sumario.total}
+                </Tag>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
