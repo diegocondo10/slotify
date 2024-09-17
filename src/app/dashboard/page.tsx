@@ -146,8 +146,9 @@ const DashboardPage = () => {
   };
 
   const search = useSearchParams();
-  const isWeekView = search.get("view") === "timeGridWeek";
-  
+  //@ts-ignore
+  const isWeekView = calendarRef.current?.getApi()?.currentData?.currentViewType === "timeGridWeek";
+
   useEffect(() => {
     const getDateFromHeader = (event: any) => {
       const target = event.target.closest(".fc-col-header-cell");
@@ -237,7 +238,7 @@ const DashboardPage = () => {
   }, [search]);
 
   return (
-    <div style={{ height: "calc(100vh - 100px)", width: "100vw" }}>
+    <div style={{ height: "calc(100vh - 90px)", width: "100vw" }} className="mb-2">
       {queryCitas.isFetching && (
         <div
           style={{
@@ -443,8 +444,9 @@ const DashboardPage = () => {
         longPressDelay={300} // Reduce el tiempo necesario para empezar a arrastrar en dispositivos móviles
         dragScroll={true} // Permite que la vista se desplace mientras arrastras un evento
       />
+
       {isWeekView && (
-        <div className='grid-sumary-container'>
+        <div className='grid-sumary-container mb-5'>
           <div className='grid-sumary-item text-center py-2'>
             <p className='p-0 m-0 text-sm'>Confirmados</p>
           </div>
