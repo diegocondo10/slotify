@@ -10,3 +10,7 @@ export function isInStandaloneMode() {
   // Para otros dispositivos (p.ej. Android)
   return window.matchMedia("(display-mode: standalone)").matches;
 }
+
+export const isPwaInIOS = () => {
+  return isIOS() && isInStandaloneMode();
+};

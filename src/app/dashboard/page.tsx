@@ -8,6 +8,7 @@ import { CrudActions } from "@/emuns/crudActions";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { formatToTimeString, toBackDate } from "@/utils/date";
+import { isPwaInIOS } from "@/utils/device";
 import { createClickHandler, simulateTouch } from "@/utils/events";
 import { DatePointApi, DatesSetArg, EventClickArg } from "@fullcalendar/core/index.js";
 import { EventImpl } from "@fullcalendar/core/internal";
@@ -26,7 +27,6 @@ import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
 import OverlayPanelNotas from "./components/OverlayPanelNotas";
-import { isInStandaloneMode, isIOS } from "@/utils/device";
 
 const citaService = new CitaService();
 
@@ -240,16 +240,24 @@ const DashboardPage = () => {
   const [calcHeight, setCalcHeight] = useState(0);
 
   useEffect(() => {
-    const navbar = document.querySelector("#navbar");
-    const summaryToolbar = document.querySelector("#summary_toolbar");
-    if (isIOS() && isInStandaloneMode()) {
-      alert("PRUEBA");
-    }
-    setCalcHeight(navbar.clientHeight + (summaryToolbar?.clientHeight || 0) + 30);
+    const calcularHeight = () => {
+      const viewportHeight = window.innerHeight;
+      const navbarHeight = document.querySelector("#navbar")?.clientHeight || 0;
+      const summaryToolbarHeight = document.querySelector("#summary_toolbar")?.clientHeight || 0;
+      const extraHeigh = isPwaInIOS() ? 30 : 10;
+      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeigh));
+    };
+
+    calcularHeight();
+
+    window.addEventListener("resize", calcularHeight);
+    return () => {
+      window.removeEventListener("resize", calcularHeight);
+    };
   }, [isWeekView]);
 
   return (
-    <div style={{ height: `calc(100vh - ${calcHeight}px)`, width: "100vw" }} className='mb-2'>
+    <div style={{ height: `${calcHeight}px`, width: "100vw" }}>
       {queryCitas.isFetching && (
         <div
           style={{
@@ -457,7 +465,7 @@ const DashboardPage = () => {
       />
 
       {isWeekView && (
-        <div className='grid-sumary-container mb-5' id='summary_toolbar'>
+        <div className='grid-sumary-container' id='summary_toolbar'>
           <div className='grid-sumary-item text-center py-2'>
             <p className='p-0 m-0 text-sm'>Confirmados</p>
           </div>
