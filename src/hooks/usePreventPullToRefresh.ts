@@ -3,12 +3,24 @@ import { useEffect } from "react";
 const usePreventPullToRefresh = () => {
   useEffect(() => {
     let lastTouchY = 0;
+    let isPullingDown = false;
 
     const preventPullToRefresh = (e) => {
       const touchY = e.touches[0].clientY;
+      const touchDifference = touchY - lastTouchY;
 
-      if (touchY > lastTouchY && window.scrollY === 0) {
+      // Si está intentando hacer un pull hacia abajo, prevenimos el comportamiento predeterminado
+      if (touchDifference > 0 && window.scrollY === 0) {
         e.preventDefault();
+        isPullingDown = true;
+      }
+      // Si está intentando hacer un pull hacia arriba, prevenimos también.
+      else if (
+        touchDifference < 0 &&
+        window.scrollY + window.innerHeight >= document.body.scrollHeight
+      ) {
+        e.preventDefault();
+        isPullingDown = false;
       }
 
       lastTouchY = touchY;
