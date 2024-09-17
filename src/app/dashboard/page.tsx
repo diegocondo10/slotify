@@ -444,12 +444,13 @@ const DashboardPage = () => {
       />
       <div className='grid-sumary-container'>
         <div className='grid-sumary-item text-center py-2'>
-          <p className="p-0 m-0 text-sm">Confirmados</p>
+          <p className='p-0 m-0 text-sm'>Confirmados</p>
         </div>
         {Object.entries(summary).map(([key, value]) => (
           <div className='grid-sumary-item flex flex-column justify-content-around' key={key}>
             {Object.entries(value).map(([codigoEstado, sumario]) => (
               <Tag
+                key={key + codigoEstado}
                 className='text-left'
                 style={{ backgroundColor: sumario.color, color: sumario.textColor }}>
                 {sumario.total}
