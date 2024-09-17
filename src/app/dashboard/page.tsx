@@ -26,6 +26,7 @@ import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
 import OverlayPanelNotas from "./components/OverlayPanelNotas";
+import { isInStandaloneMode, isIOS } from "@/utils/device";
 
 const citaService = new CitaService();
 
@@ -241,7 +242,9 @@ const DashboardPage = () => {
   useEffect(() => {
     const navbar = document.querySelector("#navbar");
     const summaryToolbar = document.querySelector("#summary_toolbar");
-
+    if (isIOS() && isInStandaloneMode()) {
+      alert("PRUEBA");
+    }
     setCalcHeight(navbar.clientHeight + (summaryToolbar?.clientHeight || 0) + 30);
   }, [isWeekView]);
 

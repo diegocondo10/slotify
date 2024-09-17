@@ -1,6 +1,5 @@
 "use client";
 import Loading from "@/components/Loading";
-import { updateVh } from "@/utils/events";
 import { setDefaultOptions } from "date-fns";
 import { es } from "date-fns/locale";
 import { addLocale } from "primereact/api";
@@ -11,7 +10,6 @@ const LocaleContext = ({ children }) => {
   const [localeLoaded, setLocaleLoaded] = useState(false);
 
   useEffect(() => {
-    updateVh();
     registerLocale("es", es);
     setDefaultLocale("es");
 
