@@ -236,9 +236,17 @@ const DashboardPage = () => {
       calendarApi.changeView(view);
     }
   }, [search]);
+  const [calcHeight, setCalcHeight] = useState(0);
+
+  useEffect(() => {
+    const navbar = document.querySelector("#navbar");
+    const summaryToolbar = document.querySelector("#summary_toolbar");
+
+    setCalcHeight(navbar.clientHeight + (summaryToolbar?.clientHeight || 0) + 30);
+  }, [isWeekView]);
 
   return (
-    <div style={{ height: "calc(100vh - 90px)", width: "100vw" }} className="mb-2">
+    <div style={{ height: `calc(100vh - ${calcHeight}px)`, width: "100vw" }} className='mb-2'>
       {queryCitas.isFetching && (
         <div
           style={{
@@ -446,7 +454,7 @@ const DashboardPage = () => {
       />
 
       {isWeekView && (
-        <div className='grid-sumary-container mb-5'>
+        <div className='grid-sumary-container mb-5' id='summary_toolbar'>
           <div className='grid-sumary-item text-center py-2'>
             <p className='p-0 m-0 text-sm'>Confirmados</p>
           </div>

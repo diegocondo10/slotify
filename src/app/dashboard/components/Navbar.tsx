@@ -72,6 +72,7 @@ const Navbar = () => {
           },
         ]}
         end={end}
+        id='navbar'
       />
     </header>
   );
