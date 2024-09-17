@@ -54,3 +54,8 @@ export const simulateTouch = (element: HTMLElement) => {
   element.dispatchEvent(touchStartEvent);
   element.dispatchEvent(touchEndEvent);
 };
+
+export function updateVh() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty("--vh", `${vh}px`);
+}
