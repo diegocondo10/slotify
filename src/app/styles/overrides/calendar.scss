@@ -25,9 +25,13 @@
 }
 
 .fc-header-toolbar {
-  padding-top: 1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.fc-view-harness {
+  margin-top: -1rem;
+  padding-top: -1rem;
 }
 
 .fc-button {
@@ -92,4 +96,27 @@
       left: 100%;
     }
   }
+}
+
+.grid-sumary-container {
+  display: grid;
+  grid-template-columns: 80px repeat(6, 1fr);
+  background-color: #f9f9f9;
+  .grid-sumary-item {
+    border: 1px solid var(--fc-border-color);
+    box-sizing: border-box;
+    margin: -1px -0px 0 0;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &:first-child {
+      border-left: none;
+    }
+  }
+}
+
+.p-menubar.p-component {
+  padding: 0.4rem !important;
 }

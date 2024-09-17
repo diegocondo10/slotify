@@ -29,6 +29,11 @@ import OverlayPanelNotas from "./components/OverlayPanelNotas";
 
 const citaService = new CitaService();
 
+type SummaryType = Record<
+  string,
+  Record<string, { total: number; color: string; textColor: string; label: string }>
+>;
+
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
@@ -45,17 +50,20 @@ const DashboardPage = () => {
 
   const toast = useToasts();
 
-  const queryCitas = useQuery<any[]>(
+  const queryCitas = useQuery<any>(
     ["citas", currentRange],
     () => citaService.listByRange(currentRange.start, currentRange.end),
     {
       enabled: !!currentRange.start && !!currentRange.end, // Solo habilitar cuando hay un rango definido,
-      onSuccess: () => {
+      onSuccess: (citas) => {
         op.current.hide();
         opNotas.current.hide();
       },
     }
   );
+
+  const eventos: any[] = queryCitas?.data?.eventos || [];
+  const summary: SummaryType = queryCitas.data?.summary || {};
 
   const handleEventClick = createClickHandler<EventClickArg>((info: EventClickArg) => {
     //@ts-ignore
@@ -64,7 +72,7 @@ const DashboardPage = () => {
   });
 
   const handleEventDrop = async (info: EventClickArg): Promise<void> => {
-    const oldEvent = queryCitas?.data.find((event) => +event.id === +info.event.id);
+    const oldEvent = eventos.find((event) => +event.id === +info.event.id);
 
     await citaService.reagendar(info.event.id, {
       fecha: toBackDate(info.event.start),
@@ -228,7 +236,7 @@ const DashboardPage = () => {
   }, [search]);
 
   return (
-    <div style={{ height: "calc(100vh - 60px)", width: "100vw" }}>
+    <div style={{ height: "calc(100vh - 100px)", width: "100vw" }}>
       {queryCitas.isFetching && (
         <div
           style={{
@@ -360,7 +368,6 @@ const DashboardPage = () => {
       <FullCalendar
         ref={calendarRef}
         nowIndicator
-        // nowIndicatorClassNames="fc-timegrid-now-indicator-line"
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView='timeGridWeek' // Vista inicial en el calendario
         locale='es' // Configura el idioma a español
@@ -369,7 +376,7 @@ const DashboardPage = () => {
         _resize={() => false}
         dateClick={handleSlotClick}
         editable={true} // Habilita el drag and drop
-        events={queryCitas?.data || []}
+        events={eventos || []}
         eventContent={(renderProps) => {
           // Aquí puedes crear tu propio contenido personalizado
           const { event } = renderProps;
@@ -435,6 +442,22 @@ const DashboardPage = () => {
         longPressDelay={300} // Reduce el tiempo necesario para empezar a arrastrar en dispositivos móviles
         dragScroll={true} // Permite que la vista se desplace mientras arrastras un evento
       />
+      <div className='grid-sumary-container'>
+        <div className='grid-sumary-item text-center py-2'>
+          <p className="p-0 m-0 text-sm">Confirmados</p>
+        </div>
+        {Object.entries(summary).map(([key, value]) => (
+          <div className='grid-sumary-item flex flex-column justify-content-around' key={key}>
+            {Object.entries(value).map(([codigoEstado, sumario]) => (
+              <Tag
+                className='text-left'
+                style={{ backgroundColor: sumario.color, color: sumario.textColor }}>
+                {sumario.total}
+              </Tag>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
