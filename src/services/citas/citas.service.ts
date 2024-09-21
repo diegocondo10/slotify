@@ -20,4 +20,8 @@ export class CitaService extends BaseService<CitaUrls> {
   async pagar(id: PK) {
     return (await this.privateApi.put(this.urls.pagar(id))).data;
   }
+
+  async cambiarEstado(pk: PK, idEstado: PK): Promise<any> {
+    return (await this.privateApi.put(this.urls.cambiarEstado(pk), { idEstado })).data;
+  }
 }

@@ -7,6 +7,7 @@ import useDeleteRecordConfirm from "@/components/DeleteRecordConfirm/useDeleteRe
 import { CrudActions } from "@/emuns/crudActions";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
+import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { formatToTimeString, toBackDate } from "@/utils/date";
 import { isPwaInIOS } from "@/utils/device";
 import { createClickHandler, simulateTouch } from "@/utils/events";
@@ -27,8 +28,10 @@ import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
 import OverlayPanelNotas from "./components/OverlayPanelNotas";
+import { PK } from "@/types/api";
 
 const citaService = new CitaService();
+const estadoService = new EstadoCitaService();
 
 type SummaryType = Record<
   string,
@@ -62,7 +65,7 @@ const DashboardPage = () => {
       },
     }
   );
-
+  const queryEstados = useQuery(["estados_citas"], () => estadoService.listAsLabelValue());
   const eventos: any[] = queryCitas?.data?.eventos || [];
   const summary: SummaryType = queryCitas.data?.summary || {};
 
@@ -195,6 +198,11 @@ const DashboardPage = () => {
     queryCitas.refetch();
   };
 
+  const handleCambiarEstado = (pk: PK, idEstado: PK) => async () => {
+    await citaService.cambiarEstado(pk, idEstado);
+    queryCitas.refetch();
+  };
+
   const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
 
   useEffect(() => {
@@ -321,7 +329,7 @@ const DashboardPage = () => {
         }}
       />
 
-      <OverlayPanel style={{ maxWidth: "30rem" }} ref={op} dismissable>
+      <OverlayPanel style={{ minWidth: "25rem", maxWidth: "30rem" }} ref={op} dismissable>
         {selectedEvent && (
           <div className='flex flex-column'>
             <div className='flex flex-row align-items-center'>
@@ -369,6 +377,25 @@ const DashboardPage = () => {
                 <Tag>Pagada</Tag>
               </div>
             )}
+
+            <div className='flex flex-row my-2 mx-auto'>
+              {queryEstados.data?.map((estado) => (
+                <div
+                  role='button'
+                  key={estado.value.codigo}
+                  className='border-1 border-gray-500 border-round text-center flex flex-column justify-content-center mx-1 font-bold cursor-pointer'
+                  style={{
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    backgroundColor: estado.value.color,
+                    color: estado.value.colorLetra,
+                  }}
+                  onClick={handleCambiarEstado(selectedEvent.id, estado.value.id)}>
+                  {estado.value.codigo}
+                </div>
+              ))}
+            </div>
+
             <p className='my-1'>
               <strong>Fecha:</strong> {format(selectedEvent.start, "dd/MM/yyy")}
             </p>

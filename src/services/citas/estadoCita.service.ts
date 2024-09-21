@@ -1,3 +1,4 @@
+import { PK } from "@/types/api";
 import { BaseService } from "../base";
 import { ESTADO_CITA_URLS, EstadoCitaUrls } from "./estadoCita.urls";
 
