@@ -199,6 +199,7 @@ const DashboardPage = () => {
   };
 
   const handleCambiarEstado = (pk: PK, idEstado: PK) => async () => {
+    op.current.hide();
     await citaService.cambiarEstado(pk, idEstado);
     queryCitas.refetch();
   };
