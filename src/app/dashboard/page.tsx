@@ -453,6 +453,7 @@ const DashboardPage = () => {
         refOp={opNotas}
         setSelectedDateHeader={setSelectedDateHeader}
         selectedDateHeader={selectedDateHeader}
+        refetchNotas={queryNotas.refetch}
       />
 
       <FullCalendar

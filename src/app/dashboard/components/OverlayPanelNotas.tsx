@@ -15,13 +15,16 @@ const OverlayPanelNotas = ({
   refOp,
   selectedDateHeader,
   setSelectedDateHeader,
+  refetchNotas,
 }: {
   refOp: MutableRefObject<OverlayPanel>;
   selectedDateHeader: string;
   setSelectedDateHeader: Dispatch<SetStateAction<string>>;
+  refetchNotas: () => void;
 }) => {
   const methods = useForm({ mode: "onChange" });
   const [guardando, setGuardando] = useState(false);
+
   const queryNota = useQuery(
     [selectedDateHeader, "nota"],
     () => notasService.oneByDate(selectedDateHeader),
@@ -39,6 +42,7 @@ const OverlayPanelNotas = ({
     await notasService.creteOrUpdate(selectedDateHeader, { descripcion: formData.descripcion });
     setSelectedDateHeader(null);
     setGuardando(false);
+    refetchNotas();
   };
 
   return (
