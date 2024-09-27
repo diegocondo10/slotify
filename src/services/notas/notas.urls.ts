@@ -4,6 +4,7 @@ import { BaseURLs } from "../types";
 export interface NotasUrls extends BaseURLs {
   oneByDate: (fecha: string) => string;
   createOrUpdate: (fecha: string) => string;
+  listByRange: (inicio: string, fin: string) => string;
 }
 
 export const NOTAS_URLS: NotasUrls = {
@@ -14,4 +15,5 @@ export const NOTAS_URLS: NotasUrls = {
   update: (id: PK) => `notas/${id}/`,
   oneByDate: (fecha: string) => `notas/one-by-date/${fecha}/`,
   createOrUpdate: (fecha: string) => `notas/create-or-update/${fecha}/`,
+  listByRange: (inicio: string, fin: string) => `notas/list-by-range/${inicio}/${fin}/`,
 };

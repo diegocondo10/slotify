@@ -8,6 +8,7 @@ import { CrudActions } from "@/emuns/crudActions";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
+import { NotaService } from "@/services/notas/notas.service";
 import { PK } from "@/types/api";
 import { formatToTimeString, toBackDate } from "@/utils/date";
 import { isPwaInIOS } from "@/utils/device";
@@ -18,6 +19,7 @@ import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
 import { format, isEqual } from "date-fns";
+import $ from "jquery";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -32,6 +34,7 @@ import OverlayPanelNotas from "./components/OverlayPanelNotas";
 
 const citaService = new CitaService();
 const estadoService = new EstadoCitaService();
+const notasService = new NotaService();
 
 type SummaryType = Record<
   string,
@@ -65,6 +68,32 @@ const DashboardPage = () => {
       },
     }
   );
+
+  const queryNotas = useQuery<any[]>(
+    ["notas", currentRange],
+    () => notasService.listByRange(currentRange.start, currentRange.end),
+    {
+      enabled: !!currentRange.start && !!currentRange.end,
+      onSuccess: (data) => {
+        const iconClassName = "calendar__header__icon";
+
+        $(`.${iconClassName}`).remove();
+
+        $(".fc-col-header-cell-cushion").each(function () {
+          const parentTh = $(this).closest("th");
+
+          // Obtiene el valor de data-date del elemento <th> padre
+          const date = parentTh.data("date");
+
+          if (data?.[date]) {
+            const icon = $(`<i class="${iconClassName} fas fa-note-sticky mr-1 text-sm"></i>`);
+            $(this).prepend(icon);
+          }
+        });
+      },
+    }
+  );
+
   const queryEstados = useQuery(["estados_citas"], () => estadoService.listAsLabelValue());
   const eventos: any[] = queryCitas?.data?.eventos || [];
   const summary: SummaryType = queryCitas.data?.summary || {};
@@ -84,6 +113,7 @@ const DashboardPage = () => {
       horaFin: formatToTimeString(info.event.end),
     });
     await queryCitas.refetch();
+    queryNotas.refetch();
     toast.jsxToast(
       (t) => (
         <div className='flex flex-row text-sm'>
@@ -326,6 +356,7 @@ const DashboardPage = () => {
         onAccept={async (record: EventImpl) => {
           await citaService.delete(record.id);
           await queryCitas.refetch();
+          queryNotas.refetch();
           toast.addSuccessToast("Se ha eliminado la cita correctamente");
         }}
       />
@@ -473,6 +504,7 @@ const DashboardPage = () => {
           customReload: {
             click: () => {
               queryCitas.refetch();
+              queryNotas.refetch();
             },
           },
         }}

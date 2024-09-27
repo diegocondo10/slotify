@@ -1,3 +1,4 @@
+import { toBackDate } from "@/utils/date";
 import { BaseService } from "../base";
 import { NOTAS_URLS, NotasUrls } from "./notas.urls";
 
@@ -10,5 +11,10 @@ export class NotaService extends BaseService<NotasUrls> {
   }
   async creteOrUpdate(fecha: string, data: any) {
     return (await this.privateApi.post(this.urls.createOrUpdate(fecha), data)).data;
+  }
+
+  async listByRange(inicio: Date, fin: Date) {
+    return (await this.privateApi.get(this.urls.listByRange(toBackDate(inicio), toBackDate(fin))))
+      .data;
   }
 }
