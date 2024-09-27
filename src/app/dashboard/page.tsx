@@ -8,6 +8,7 @@ import { CrudActions } from "@/emuns/crudActions";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
+import { PK } from "@/types/api";
 import { formatToTimeString, toBackDate } from "@/utils/date";
 import { isPwaInIOS } from "@/utils/device";
 import { createClickHandler, simulateTouch } from "@/utils/events";
@@ -28,7 +29,6 @@ import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
 import OverlayPanelNotas from "./components/OverlayPanelNotas";
-import { PK } from "@/types/api";
 
 const citaService = new CitaService();
 const estadoService = new EstadoCitaService();
@@ -490,6 +490,7 @@ const DashboardPage = () => {
           return format(info.date, "hh:mm a").toUpperCase();
         }}
         firstDay={1}
+        // hiddenDays={[0]}
         eventDrop={handleEventDrop} // Manejador para cuando se arrastra y suelta un evento
         eventClick={handleEventClick} // Manejador para clic en un evento
         dragRevertDuration={300}
@@ -499,7 +500,7 @@ const DashboardPage = () => {
         snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
         datesSet={handleDatesSet} // Manejador para capturar la fecha visible actual
         longPressDelay={300} // Reduce el tiempo necesario para empezar a arrastrar en dispositivos móviles
-        dragScroll={true} // Permite que la vista se desplace mientras arrastras un evento
+        dragScroll={false} // Permite que la vista se desplace mientras arrastras un evento
       />
 
       {isWeekView && (

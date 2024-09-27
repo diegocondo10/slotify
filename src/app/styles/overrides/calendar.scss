@@ -1,13 +1,9 @@
-.fc-event-resizer.fc-event-resizer-end {
-  display: none !important;
-}
+// .fc-event-resizer.fc-event-resizer-end {
+//   display: none !important;
+// }
 
 .fc-event-time {
   display: none;
-}
-
-.fc-timegrid-slot-label-cushion {
-  font-weight: 400;
 }
 
 .fc-event-title {
@@ -116,7 +112,6 @@
       border-left: none;
       & > * {
         font-size: 0.84rem !important;
-        // color: rebeccapurple;
       }
     }
   }
@@ -126,6 +121,18 @@
   padding: 0.4rem !important;
 }
 
+.fc-timegrid-slot-label-cushion {
+  font-weight: 400;
+}
+
 .fc-timegrid-slot {
   font-size: 1rem !important;
+}
+
+.fc-scroller {
+  overflow-x: hidden;
+}
+.full-calendar-container {
+  overflow-x: hidden; /* Ocultar el desplazamiento horizontal */
+  width: 100%;
 }
