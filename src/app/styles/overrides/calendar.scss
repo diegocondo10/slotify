@@ -100,8 +100,9 @@
 
 .grid-sumary-container {
   display: grid;
-  grid-template-columns: 80px repeat(6, 1fr);
+  grid-template-columns: 71px repeat(7, 1fr);
   background-color: #f9f9f9;
+
   .grid-sumary-item {
     border: 1px solid var(--fc-border-color);
     box-sizing: border-box;
@@ -113,10 +114,18 @@
 
     &:first-child {
       border-left: none;
+      & > * {
+        font-size: 0.84rem !important;
+        // color: rebeccapurple;
+      }
     }
   }
 }
 
 .p-menubar.p-component {
   padding: 0.4rem !important;
+}
+
+.fc-timegrid-slot {
+  font-size: 1rem !important;
 }

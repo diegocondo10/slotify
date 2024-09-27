@@ -437,7 +437,6 @@ const DashboardPage = () => {
         editable={true} // Habilita el drag and drop
         events={eventos || []}
         eventContent={(renderProps) => {
-          // Aquí puedes crear tu propio contenido personalizado
           const { event } = renderProps;
 
           return (
@@ -485,13 +484,14 @@ const DashboardPage = () => {
           hour: "numeric",
           minute: "2-digit",
           hour12: true, // Formato de 12 horas (AM/PM)
+          meridiem: "short",
         }}
-        hiddenDays={[0]} // Oculta los domingos
+        slotLabelContent={(info) => {
+          return format(info.date, "hh:mm a").toUpperCase();
+        }}
+        firstDay={1}
         eventDrop={handleEventDrop} // Manejador para cuando se arrastra y suelta un evento
         eventClick={handleEventClick} // Manejador para clic en un evento
-        eventResize={(evt) => {
-          console.log("RESIZE: ", evt);
-        }}
         dragRevertDuration={300}
         eventDurationEditable
         height='100%' // Hace que el calendario ocupe el 100% del contenedor
@@ -504,8 +504,8 @@ const DashboardPage = () => {
 
       {isWeekView && (
         <div className='grid-sumary-container' id='summary_toolbar'>
-          <div className='grid-sumary-item text-center py-2'>
-            <p className='p-0 m-0 text-sm'>Confirmados</p>
+          <div className='grid-sumary-item text-center py-2 px-0 mx-0'>
+            <p className='p-0 m-0'>Confirmados</p>
           </div>
           {Object.entries(summary).map(([key, value]) => (
             <div className='grid-sumary-item flex flex-column justify-content-around' key={key}>
