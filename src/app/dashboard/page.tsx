@@ -80,10 +80,7 @@ const DashboardPage = () => {
         $(`.${iconClassName}`).remove();
 
         $(".fc-col-header-cell-cushion").each(function () {
-          const parentTh = $(this).closest("th");
-
-          // Obtiene el valor de data-date del elemento <th> padre
-          const date = parentTh.data("date");
+          const date = $(this).closest("th").data("date");
 
           if (data?.[date]) {
             const icon = $(`<i class="${iconClassName} fas fa-note-sticky mr-1 text-sm"></i>`);
@@ -470,7 +467,6 @@ const DashboardPage = () => {
         events={eventos || []}
         eventContent={(renderProps) => {
           const { event } = renderProps;
-
           return (
             <div className='flex h-full'>
               <div className='fc-event-title'>

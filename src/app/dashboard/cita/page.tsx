@@ -12,7 +12,7 @@ import useCreateUpdate from "@/hooks/useCreateUpdate";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
-import { ClienteService } from "@/services/clientes/clientes.service";
+import { TagCitaService } from "@/services/citas/tagCita.service";
 import { formatToTimeString, toBackDate, toFrontDate } from "@/utils/date";
 import classNames from "classnames";
 import { addMonths, setHours, subDays } from "date-fns";
@@ -28,12 +28,16 @@ import CreatableSelect from "react-select/creatable";
 
 const today = new Date();
 
+const tagService = new TagCitaService();
+const citaService = new CitaService();
+const estadoService = new EstadoCitaService();
+
 const CitaPage = ({ searchParams }) => {
   const [loading, setLoading] = useState(true);
   const [estadosIndexed, setEstadosIndexed] = useState<Record<string, any>>({});
-  const [pacientesIndex, setPacientesIndex] = useState<Record<string, any>>({});
+  const [tagsIndex, setTagsIndex] = useState<Record<string, any>>({});
   const [estados, setEstados] = useState<any[]>([]);
-  const [pacientes, setPacientes] = useState<any[]>([]);
+  const [tags, setTags] = useState<any[]>([]);
   const [isCreating, setIsCreating] = useState(false);
 
   const action = searchParams.action;
@@ -63,30 +67,26 @@ const CitaPage = ({ searchParams }) => {
     }
   }, []);
 
-  const queryEstados = useQuery(
-    ["estados_citas"],
-    () => new EstadoCitaService().listAsLabelValue(),
-    {
-      onSuccess: (data) => {
-        if (isCreate) {
-          setEstados(data.filter((item) => item.value.showOnCreate));
-          const estadoDefault = data.find((item) => item.value.isDefaultForCreate);
-          methods.setValue("estado", estadoDefault.value.id);
-        } else {
-          setEstados(data.filter((item) => item.value.showOnUpdate));
-        }
-        setEstadosIndexed(keyBy(data, "value.id"));
-      },
-    }
-  );
+  const queryEstados = useQuery(["estados_citas"], () => estadoService.listAsLabelValue(), {
+    onSuccess: (data) => {
+      if (isCreate) {
+        setEstados(data.filter((item) => item.value.showOnCreate));
+        const estadoDefault = data.find((item) => item.value.isDefaultForCreate);
+        methods.setValue("estado", estadoDefault.value.id);
+      } else {
+        setEstados(data.filter((item) => item.value.showOnUpdate));
+      }
+      setEstadosIndexed(keyBy(data, "value.id"));
+    },
+  });
 
   const queryClientes = useQuery(
     ["clientes_list_label_value"],
-    () => new ClienteService().listAsLabelValue(),
+    () => tagService.listAsLabelValue(),
     {
       onSuccess: (data) => {
-        setPacientes(data);
-        setPacientesIndex(keyBy(data, "value"));
+        setTags(data);
+        setTagsIndex(keyBy(data, "value"));
       },
     }
   );
@@ -99,7 +99,7 @@ const CitaPage = ({ searchParams }) => {
       data.horaFin = toFrontDate(data.horaFin);
       methods.reset({
         ...data,
-        cliente: pacientesIndex[data.cliente],
+        tag: tagsIndex[data.tag],
       });
       setLoading(false);
     },
@@ -126,7 +126,7 @@ const CitaPage = ({ searchParams }) => {
       formData.fecha = toBackDate(formData.fecha);
       formData.horaInicio = formatToTimeString(formData.horaInicio);
       formData.horaFin = formatToTimeString(formData.horaFin);
-      formData.cliente = formData.cliente.value;
+      formData.tag = formData.tag.value;
       console.log("FORM DATA: ", formData);
       await mutation.submitForm(formData);
       router.push("/dashboard");
@@ -135,18 +135,18 @@ const CitaPage = ({ searchParams }) => {
     }
   };
 
-  const onCreateNewPaciente = async (inputValue: string) => {
+  const onCreateNewTag = async (inputValue: string) => {
     setIsCreating(true);
     try {
-      const response = await new ClienteService().createBasic(inputValue);
-      const newCliente = {
-        label: response.fullName,
-        value: response.id,
+      const response = await tagService.create({ titulo: inputValue });
+      const newTag = {
+        label: response.data.label,
+        value: response.data.value,
       };
-      methods.setValue("cliente", newCliente);
-      setPacientes([newCliente, ...pacientes]);
+      setTags([newTag, ...tags]);
+      methods.setValue("tag", newTag);
     } catch (error) {
-      toast.addErrorToast("Ha ocurrido un problema al momento de crear el nuevo paciente");
+      toast.addErrorToast("Ha ocurrido un problema al momento de registrar ese título");
     }
     setIsCreating(false);
   };
@@ -185,8 +185,8 @@ const CitaPage = ({ searchParams }) => {
               <div className='w-full grid grid-nogutter'>
                 <div className='field col-12'>
                   <FormFieldRender
-                    label='Paciente'
-                    name='cliente'
+                    label='Título'
+                    name='tag'
                     render={({ name }) => (
                       <Controller
                         name={name}
@@ -199,8 +199,8 @@ const CitaPage = ({ searchParams }) => {
                               "border-1 border-red-600 border-round": fieldState.invalid,
                             })}
                             isDisabled={loading || isCreating}
-                            onCreateOption={onCreateNewPaciente}
-                            options={pacientes}
+                            onCreateOption={onCreateNewTag}
+                            options={tags}
                             formatCreateLabel={(inputValue) => (
                               <p className='p-0 m-0'>
                                 <strong>Crear: </strong>
