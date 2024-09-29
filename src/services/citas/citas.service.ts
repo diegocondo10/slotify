@@ -13,6 +13,18 @@ export class CitaService extends BaseService<CitaUrls> {
       .data;
   }
 
+  async reporteStats(start: Date, end: Date) {
+    return (
+      await this.privateApi.get(this.urls.reporteEstadisticas(toBackDate(start), toBackDate(end)))
+    ).data;
+  }
+
+  async reporteListStats(start: Date, end: Date) {
+    return (
+      await this.privateApi.get(this.urls.reporteListStats(toBackDate(start), toBackDate(end)))
+    ).data;
+  }
+
   async reagendar(id: PK, body: any) {
     return (await this.privateApi.put(this.urls.reagendar(id), body)).data;
   }

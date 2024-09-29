@@ -1,6 +1,6 @@
 "use client";
 import Button from "@/components/Buttons/Button";
-import { commandPush, lazyPush } from "@/utils/router";
+import { lazyPush } from "@/utils/router";
 import classNames from "classnames";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -31,7 +31,7 @@ const Navbar = () => {
           <div className='col-12'>
             <Button
               className='border-noround mb-1'
-              label='Recargar'
+              label='Recargar aplicación'
               icon={PrimeIcons.REFRESH}
               variant='info'
               block
@@ -64,7 +64,24 @@ const Navbar = () => {
         model={[
           {
             label: "Inicio",
+            icon: PrimeIcons.HOME,
             command: lazyPush(router, "/dashboard"),
+          },
+          {
+            label: "Reportes",
+            icon: PrimeIcons.PRINT,
+            items: [
+              {
+                label: "General",
+                icon: PrimeIcons.PRINT,
+                command: lazyPush(router, "/dashboard/reportes/general"),
+              },
+              {
+                label: "Pagos",
+                icon: PrimeIcons.WALLET,
+                command: lazyPush(router, "/dashboard/reportes/pagos"),
+              },
+            ],
           },
         ]}
         end={end}

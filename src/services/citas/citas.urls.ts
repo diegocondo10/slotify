@@ -6,6 +6,8 @@ export interface CitaUrls extends BaseURLs {
   reagendar: (id: PK) => string;
   pagar: (id: PK) => string;
   cambiarEstado: (pk: PK) => string;
+  reporteEstadisticas: (start: string, end: string) => string;
+  reporteListStats: (start: string, end: string) => string;
 }
 
 export const CITAS_URLS: CitaUrls = {
@@ -18,4 +20,6 @@ export const CITAS_URLS: CitaUrls = {
   reagendar: (id: PK) => `citas/${id}/reagendar/`,
   pagar: (id: PK) => `citas/${id}/pagar/`,
   cambiarEstado: (pk: PK) => `citas/${pk}/cambiar-estado/`,
+  reporteEstadisticas: (start: string, end: string) => `citas/reporte/stats/${start}/${end}/`,
+  reporteListStats: (start: string, end: string) => `citas/reporte/list-stats/${start}/${end}/`,
 };
