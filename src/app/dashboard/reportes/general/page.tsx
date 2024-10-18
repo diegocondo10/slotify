@@ -1,5 +1,6 @@
 "use client";
 import PageTitle from "@/components/pages/PageTitle";
+import useRouteState from "@/hooks/useRouteState";
 import { CitaService } from "@/services/citas/citas.service";
 import { getTextColorForBackground } from "@/utils/color";
 import ChartDataLabels from "chartjs-plugin-datalabels";
@@ -11,15 +12,31 @@ import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { Toolbar } from "primereact/toolbar";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
 import { useQuery } from "react-query";
 
 const citaService = new CitaService();
 
 const ReporteGeneralPage = () => {
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(addDays(new Date(), 7));
+  const { routeState, setRouteValue } = useRouteState<{ start: Date; end: Date }>();
+
+  const startDate = routeState?.start;
+
+  const endDate = routeState?.end;
+
+  const setStartDate = (value: Date) => setRouteValue("start", value);
+
+  const setEndDate = (value: Date) => setRouteValue("end", value);
+
+  useEffect(() => {
+    if (!startDate) {
+      setStartDate(new Date());
+    }
+    if (!endDate) {
+      setEndDate(addDays(new Date(), 7));
+    }
+  }, []);
 
   const [data, setData] = useState({});
 
@@ -179,7 +196,7 @@ const ReporteGeneralPage = () => {
               <Toolbar
                 start={
                   <Dropdown
-                    className='w-25rem'
+                    className='w-20rem'
                     options={queryReporteList?.data?.estados || []}
                     value={selectedEstado}
                     onChange={({ value }) => setSelectedEstado(value)}
