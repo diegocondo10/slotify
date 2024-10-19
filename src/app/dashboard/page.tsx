@@ -18,7 +18,7 @@ import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
-import { format, isEqual } from "date-fns";
+import { endOfWeek, format, isEqual, startOfWeek } from "date-fns";
 import $ from "jquery";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
@@ -167,8 +167,8 @@ const DashboardPage = () => {
 
   const handleDatesSet = (dateInfo: DatesSetArg) => {
     const newRange = {
-      start: dateInfo?.start,
-      end: dateInfo?.end,
+      start: startOfWeek(dateInfo.start, { weekStartsOn: 1 }), // Empieza el lunes
+      end: endOfWeek(dateInfo.start, { weekStartsOn: 1 }), // Termina el domingo
     };
 
     if (!isEqual(newRange.start, currentRange.start) || !isEqual(newRange.end, currentRange.end)) {
@@ -535,7 +535,7 @@ const DashboardPage = () => {
       {isWeekView && (
         <div className='grid-sumary-container' id='summary_toolbar'>
           <div className='grid-sumary-item text-center py-2 px-0 mx-0'>
-            <p className='p-0 m-0'>Confirmados</p>
+            <p className='p-0 m-0'>Atendidos</p>
           </div>
           {Object.entries(summary).map(([key, value]) => (
             <div className='grid-sumary-item flex flex-column justify-content-around' key={key}>
