@@ -5,6 +5,7 @@ import DeleteRecordConfirm from "@/components/DeleteRecordConfirm";
 import RecordDetail from "@/components/DeleteRecordConfirm/RecordDetail";
 import useDeleteRecordConfirm from "@/components/DeleteRecordConfirm/useDeleteRecordConfirm";
 import { CrudActions } from "@/emuns/crudActions";
+import useRouteState from "@/hooks/useRouteState";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
@@ -12,6 +13,7 @@ import { NotaService } from "@/services/notas/notas.service";
 import { PK } from "@/types/api";
 import { formatToTimeString, toBackDate } from "@/utils/date";
 import { isPwaInIOS } from "@/utils/device";
+import { addIconInButton } from "@/utils/dom";
 import { createClickHandler, simulateTouch } from "@/utils/events";
 import { DatePointApi, DatesSetArg, EventClickArg } from "@fullcalendar/core/index.js";
 import { EventImpl } from "@fullcalendar/core/internal";
@@ -20,7 +22,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
 import { format, isEqual } from "date-fns";
 import $ from "jquery";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -41,6 +43,14 @@ type SummaryType = Record<
   Record<string, { total: number; color: string; textColor: string; label: string }>
 >;
 
+type RouteStateProps = {
+  currentRange: {
+    start: Date;
+    end: Date;
+  };
+  view: string;
+};
+
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
@@ -50,10 +60,22 @@ const DashboardPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [selectedDateHeader, setSelectedDateHeader] = useState<string>(null);
 
-  const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
-    start: null,
-    end: null,
+  const { routeState, setRouteValue } = useRouteState<RouteStateProps>({
+    stateKey: "state",
+    onLoad: (state) => {
+      console.log("STATE: ", state.currentRange);
+      const view = state?.view || "timeGridWeek";
+      if (calendarRef.current) {
+        const calendarApi = calendarRef.current.getApi();
+        calendarApi.changeView(view);
+        calendarApi.gotoDate(state?.currentRange?.start || new Date());
+      }
+    },
   });
+
+  const currentRange = routeState?.currentRange;
+
+  const setCurrentRange = (value: any) => setRouteValue("currentRange", value);
 
   const toast = useToasts();
 
@@ -61,7 +83,7 @@ const DashboardPage = () => {
     ["citas", currentRange],
     () => citaService.listByRange(currentRange.start, currentRange.end),
     {
-      enabled: !!currentRange.start && !!currentRange.end, // Solo habilitar cuando hay un rango definido,
+      enabled: !!currentRange?.start && !!currentRange?.end, // Solo habilitar cuando hay un rango definido,
       onSuccess: (citas) => {
         op.current.hide();
         opNotas.current.hide();
@@ -73,7 +95,7 @@ const DashboardPage = () => {
     ["notas", currentRange],
     () => notasService.listByRange(currentRange.start, currentRange.end),
     {
-      enabled: !!currentRange.start && !!currentRange.end,
+      enabled: !!currentRange?.start && !!currentRange?.end,
       onSuccess: (data) => {
         const iconClassName = "calendar__header__icon";
 
@@ -171,12 +193,14 @@ const DashboardPage = () => {
       end: dateInfo?.end,
     };
 
-    if (!isEqual(newRange.start, currentRange.start) || !isEqual(newRange.end, currentRange.end)) {
-      setCurrentRange(newRange);
-    }
+    // if (
+    //   !isEqual(newRange.start, currentRange?.start) ||
+    //   !isEqual(newRange.end, currentRange?.end)
+    // ) {
+    //   setCurrentRange(newRange);
+    // }
   };
 
-  const search = useSearchParams();
   //@ts-ignore
   const isWeekView = calendarRef.current?.getApi()?.currentData?.currentViewType === "timeGridWeek";
 
@@ -191,8 +215,8 @@ const DashboardPage = () => {
       const date = getDateFromHeader(event);
       if (date && calendarRef.current) {
         const calendarApi = calendarRef.current.getApi();
-        const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
-        router.push(window.location.pathname + path);
+        setRouteValue("view", "timeGridDay");
+        setRouteValue("date", date);
         calendarApi.changeView("timeGridDay", date);
       }
     };
@@ -234,58 +258,47 @@ const DashboardPage = () => {
   const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
 
   useEffect(() => {
-    const handleOnClickButton = (view: string) => () => {
-      const currentPath = window.location.pathname;
-      router.push(`${currentPath}?view=${view}`);
-    };
+    const handleOnClickButton = (view: string) => () => setRouteValue("view", view);
 
     const weekButton = document.querySelector(".fc-timeGridWeek-button");
     const dayButton = document.querySelector(".fc-timeGridDay-button");
 
     const handleWeek = handleOnClickButton("timeGridWeek");
+
     const handleDay = handleOnClickButton("timeGridDay");
 
-    if (weekButton) {
-      weekButton.addEventListener("click", handleWeek);
-    }
-    if (dayButton) {
-      dayButton.addEventListener("click", handleDay);
-    }
-    const reloadButton = document.querySelector(".fc-customReload-button");
-    if (reloadButton) {
-      const iconElement = document.createElement("i");
-      iconElement.classList.add("fa", "fa-solid", "fa-rotate");
-      reloadButton.innerHTML = "";
-      reloadButton.appendChild(iconElement);
-    }
+    weekButton.addEventListener("click", handleWeek);
+
+    dayButton.addEventListener("click", handleDay);
+
+    addIconInButton(".fc-customReload-button", "fa fa-solid fa-rotate");
+    addIconInButton(".fc-customConfig-button", "fa fa-solid fa-gear");
+
     return () => {
-      if (weekButton) {
-        weekButton.removeEventListener("click", handleWeek);
-        dayButton.removeEventListener("click", handleDay);
-      }
+      weekButton.removeEventListener("click", handleWeek);
+      dayButton.removeEventListener("click", handleDay);
     };
   }, []);
 
-  useEffect(() => {
-    const view = search.get("view") || "timeGridWeek";
-    if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.changeView(view);
-    }
-  }, [search]);
   const [calcHeight, setCalcHeight] = useState(0);
 
   useEffect(() => {
     const calcularHeight = () => {
       const viewportHeight = window.innerHeight;
-      const navbarHeight = document.querySelector("#navbar")?.clientHeight || 0;
-      const summaryToolbarHeight = document.querySelector("#summary_toolbar")?.clientHeight || 0;
-      const extraHeigh = isPwaInIOS() ? 20 : 10;
-      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeigh));
+
+      const navbarElement = document.querySelector("#navbar");
+      const summaryToolbarElement = document.querySelector("#summary_toolbar");
+
+      const navbarHeight = navbarElement?.clientHeight || 0;
+      const summaryToolbarHeight = summaryToolbarElement?.clientHeight || 0;
+      const extraHeight = isPwaInIOS() ? 20 : 10;
+
+      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeight));
     };
 
     calcularHeight();
 
+    window.removeEventListener("resize", calcularHeight);
     window.addEventListener("resize", calcularHeight);
     return () => {
       window.removeEventListener("resize", calcularHeight);
@@ -490,7 +503,7 @@ const DashboardPage = () => {
         headerToolbar={{
           left: "prev,today,next",
           center: "title",
-          right: "customReload,timeGridWeek,timeGridDay", // Solo las vistas de semana y día
+          right: "customConfig,customReload,timeGridWeek,timeGridDay", // Solo las vistas de semana y día
         }}
         buttonText={{
           today: "Hoy",
@@ -519,7 +532,7 @@ const DashboardPage = () => {
           return format(info.date, "hh:mm a").toUpperCase();
         }}
         firstDay={1}
-        // hiddenDays={[0]}
+        // hiddenDays={[0, 5, 6]}
         eventDrop={handleEventDrop} // Manejador para cuando se arrastra y suelta un evento
         eventClick={handleEventClick} // Manejador para clic en un evento
         dragRevertDuration={300}
