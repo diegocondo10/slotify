@@ -23,7 +23,9 @@ export const createClickHandler = <E>(
   };
 };
 
-export const simulateTouch = (element: HTMLElement) => {
+export const simulateTouch = () => {
+  const element = document.getElementById("simulateTouchElement");
+
   const touch = new Touch({
     identifier: Date.now(),
     target: element,
@@ -50,7 +52,6 @@ export const simulateTouch = (element: HTMLElement) => {
     cancelable: true,
     touches: [touch],
   });
-
   element.dispatchEvent(touchStartEvent);
   element.dispatchEvent(touchEndEvent);
 };

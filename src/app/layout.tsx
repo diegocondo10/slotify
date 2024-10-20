@@ -45,6 +45,19 @@ export default async function RootLayout({
         <script src='https://kit.fontawesome.com/49a17ce65c.js' crossOrigin='anonymous' async />
       </head>
       <body className={roboto.className}>
+        <div
+          id='simulateTouchElement'
+          tabIndex={-1}
+          style={{
+            position: "absolute",
+            top: "-1000px",
+            left: "-1000px",
+            width: "1px",
+            height: "1px",
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+        />
         <QueryClientContextProvider>
           <LocaleContext>
             <ClientSessionProvider session={session}>{children}</ClientSessionProvider>

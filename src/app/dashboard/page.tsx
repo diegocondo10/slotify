@@ -27,13 +27,13 @@ import { isEqual } from "lodash";
 import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { Tag } from "primereact/tag";
 import { useEffect, useRef, useState } from "react";
 import { FaTasks } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
+import CalendarLoader from "./components/CalendarLoader";
 import OverlayPanelNotas from "./components/OverlayPanelNotas";
 
 const citaService = new CitaService();
@@ -59,7 +59,6 @@ const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
   const opNotas = useRef<OverlayPanel>(null);
-  const blurRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [selectedDateHeader, setSelectedDateHeader] = useState<string>(null);
@@ -75,7 +74,6 @@ const DashboardPage = () => {
       view: WEEK_VIEW,
     },
     onLoad: (state) => {
-      console.log("STATE: ", state);
       const view = state?.view || WEEK_VIEW;
       if (calendarRef.current) {
         const calendarApi = calendarRef.current.getApi();
@@ -189,7 +187,7 @@ const DashboardPage = () => {
         },
       }
     );
-    simulateTouch(blurRef.current);
+    simulateTouch();
   };
 
   const handleSlotClick = createClickHandler((info: DatePointApi) => {
@@ -217,7 +215,7 @@ const DashboardPage = () => {
   };
 
   //@ts-ignore
-  const isWeekView = calendarRef.current?.getApi()?.currentData?.currentViewType === "timeGridWeek";
+  const isWeekView = calendarRef.current?.getApi()?.currentData?.currentViewType === WEEK_VIEW;
 
   useEffect(() => {
     const getDateFromHeader = (event: any) => {
@@ -278,7 +276,7 @@ const DashboardPage = () => {
     const weekButton = document.querySelector(".fc-timeGridWeek-button");
     const dayButton = document.querySelector(".fc-timeGridDay-button");
 
-    const handleWeek = handleOnClickButton("timeGridWeek");
+    const handleWeek = handleOnClickButton(WEEK_VIEW);
 
     const handleDay = handleOnClickButton("timeGridDay");
 
@@ -322,32 +320,7 @@ const DashboardPage = () => {
 
   return (
     <div style={{ height: `${calcHeight}px`, width: "100vw" }}>
-      {queryCitas.isFetching && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1000,
-          }}>
-          <ProgressSpinner />
-          <p className='font-bold text-xl'>Buscando...</p>
-        </div>
-      )}
-      <div
-        ref={blurRef}
-        tabIndex={-1}
-        style={{
-          position: "absolute",
-          top: "-1000px",
-          left: "-1000px",
-          width: "1px",
-          height: "1px",
-          opacity: 0,
-          pointerEvents: "none",
-        }}
-      />
+      {queryCitas.isFetching && <CalendarLoader />}
 
       <DeleteRecordConfirm
         ref={deleteRecordRef}
@@ -485,7 +458,7 @@ const DashboardPage = () => {
         ref={calendarRef}
         nowIndicator
         plugins={[timeGridPlugin, interactionPlugin]}
-        initialView='timeGridWeek' // Vista inicial en el calendario
+        initialView={WEEK_VIEW} // Vista inicial en el calendario
         locale='es' // Configura el idioma a español
         weekends={true} // Mostrar fines de semana
         eventResizableFromStart={false}
