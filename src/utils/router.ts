@@ -14,3 +14,12 @@ export const lazyPush = (router: AppRouterInstance, href: string, options?: Navi
     router.push(href, options);
   };
 };
+
+export const getCurrentPathEncoded = () => {
+  return encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+};
+
+export const extractGoBackTo = () => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("goBackTo");
+};

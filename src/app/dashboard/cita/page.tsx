@@ -14,6 +14,7 @@ import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { TagCitaService } from "@/services/citas/tagCita.service";
 import { formatToTimeString, toBackDate, toFrontDate } from "@/utils/date";
+import { extractGoBackTo } from "@/utils/router";
 import classNames from "classnames";
 import { addMonths, setHours, subDays } from "date-fns";
 import { addHours } from "date-fns/addHours";
@@ -129,7 +130,7 @@ const CitaPage = ({ searchParams }) => {
       formData.tag = formData.tag.value;
       console.log("FORM DATA: ", formData);
       await mutation.submitForm(formData);
-      router.push("/dashboard");
+      router.push(extractGoBackTo());
     } catch (error) {
       console.log(error);
     }
@@ -171,7 +172,7 @@ const CitaPage = ({ searchParams }) => {
                     label='Regresar'
                     className='w-10rem'
                     loading={isLoading}
-                    href='/dashboard'
+                    href={extractGoBackTo()}
                   />
                   <Button
                     label='Guardar'

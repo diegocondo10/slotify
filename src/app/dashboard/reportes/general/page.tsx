@@ -215,7 +215,8 @@ const ReporteGeneralPage = () => {
             paginator
             rows={10}
             rowsPerPageOptions={[10, 20, 50]}
-            exportFilename='report.xlsx'>
+            paginatorTemplate='FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown'
+            currentPageReportTemplate='{totalRecords} Registros'>
             <Column
               header='#'
               className='text-center font-bold'

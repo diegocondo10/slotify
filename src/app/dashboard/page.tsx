@@ -15,13 +15,15 @@ import { formatToTimeString, toBackDate } from "@/utils/date";
 import { isPwaInIOS } from "@/utils/device";
 import { addIconInButton } from "@/utils/dom";
 import { createClickHandler, simulateTouch } from "@/utils/events";
+import { getCurrentPathEncoded } from "@/utils/router";
 import { DatePointApi, DatesSetArg, EventClickArg } from "@fullcalendar/core/index.js";
 import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
-import { endOfWeek, format, isEqual, startOfWeek } from "date-fns";
+import { endOfWeek, format, startOfWeek } from "date-fns";
 import $ from "jquery";
+import { isEqual } from "lodash";
 import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -51,6 +53,8 @@ type RouteStateProps = {
   view: string;
 };
 
+const WEEK_VIEW = "timeGridWeek";
+
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
@@ -59,12 +63,20 @@ const DashboardPage = () => {
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [selectedDateHeader, setSelectedDateHeader] = useState<string>(null);
+  const toast = useToasts();
 
-  const { routeState, setRouteValue } = useRouteState<RouteStateProps>({
+  const { routeState, setRouteValue, isInitializing } = useRouteState<RouteStateProps>({
     stateKey: "state",
+    defaultValues: {
+      currentRange: {
+        start: startOfWeek(new Date(), { weekStartsOn: 1 }),
+        end: endOfWeek(new Date(), { weekStartsOn: 1 }),
+      },
+      view: WEEK_VIEW,
+    },
     onLoad: (state) => {
-      console.log("STATE: ", state.currentRange);
-      const view = state?.view || "timeGridWeek";
+      console.log("STATE: ", state);
+      const view = state?.view || WEEK_VIEW;
       if (calendarRef.current) {
         const calendarApi = calendarRef.current.getApi();
         calendarApi.changeView(view);
@@ -76,8 +88,6 @@ const DashboardPage = () => {
   const currentRange = routeState?.currentRange;
 
   const setCurrentRange = (value: any) => setRouteValue("currentRange", value);
-
-  const toast = useToasts();
 
   const queryCitas = useQuery<any>(
     ["citas", currentRange],
@@ -184,21 +194,26 @@ const DashboardPage = () => {
 
   const handleSlotClick = createClickHandler((info: DatePointApi) => {
     const fecha = encodeURIComponent(info.date.toISOString());
-    router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}`);
+    const goBackTo = getCurrentPathEncoded();
+    router.push(`/dashboard/cita?action=${CrudActions.CREATE}&fecha=${fecha}&goBackTo=${goBackTo}`);
   });
 
   const handleDatesSet = (dateInfo: DatesSetArg) => {
+    if (isInitializing) {
+      return;
+    }
+
     const newRange = {
       start: startOfWeek(dateInfo.start, { weekStartsOn: 1 }), // Empieza el lunes
       end: endOfWeek(dateInfo.start, { weekStartsOn: 1 }), // Termina el domingo
     };
 
-    // if (
-    //   !isEqual(newRange.start, currentRange?.start) ||
-    //   !isEqual(newRange.end, currentRange?.end)
-    // ) {
-    //   setCurrentRange(newRange);
-    // }
+    if (
+      !isEqual(newRange.start, currentRange?.start) ||
+      !isEqual(newRange.end, currentRange?.end)
+    ) {
+      setCurrentRange(newRange);
+    }
   };
 
   //@ts-ignore

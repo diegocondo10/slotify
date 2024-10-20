@@ -67,22 +67,22 @@ const Navbar = () => {
             icon: PrimeIcons.HOME,
             command: lazyPush(router, "/dashboard"),
           },
-          // {
-          //   label: "Reportes",
-          //   icon: PrimeIcons.PRINT,
-          //   items: [
-          //     {
-          //       label: "General",
-          //       icon: PrimeIcons.PRINT,
-          //       command: lazyPush(router, "/dashboard/reportes/general"),
-          //     },
-          //     {
-          //       label: "Pagos",
-          //       icon: PrimeIcons.WALLET,
-          //       command: lazyPush(router, "/dashboard/reportes/pagos"),
-          //     },
-          //   ],
-          // },
+          {
+            label: "Reportes",
+            icon: PrimeIcons.PRINT,
+            items: [
+              {
+                label: "General",
+                icon: PrimeIcons.PRINT,
+                command: lazyPush(router, "/dashboard/reportes/general"),
+              },
+              {
+                label: "Pagos",
+                icon: PrimeIcons.WALLET,
+                command: lazyPush(router, "/dashboard/reportes/pagos"),
+              },
+            ],
+          },
         ]}
         end={end}
         id='navbar'
