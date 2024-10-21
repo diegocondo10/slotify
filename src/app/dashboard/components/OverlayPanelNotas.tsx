@@ -40,7 +40,7 @@ const OverlayPanelNotas = ({
     setGuardando(true);
     console.log(formData);
     await notasService.creteOrUpdate(selectedDateHeader, { descripcion: formData.descripcion });
-    setSelectedDateHeader(null);
+    // setSelectedDateHeader(null);
     setGuardando(false);
     refetchNotas();
   };

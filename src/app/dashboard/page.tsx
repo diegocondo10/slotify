@@ -55,43 +55,47 @@ type RouteStateProps = {
 
 const WEEK_VIEW = "timeGridWeek";
 
+const DAY_VIEW = "timeGridDay";
+
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
   const opNotas = useRef<OverlayPanel>(null);
+
   const calendarRef = useRef<FullCalendar>(null);
+  const getCalendarApi = () => calendarRef.current?.getApi();
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [selectedDateHeader, setSelectedDateHeader] = useState<string>(null);
   const toast = useToasts();
 
-  const { routeState, setRouteValue, isInitializing } = useRouteState<RouteStateProps>({
-    stateKey: "state",
-    defaultValues: {
-      currentRange: {
-        start: startOfWeek(new Date(), { weekStartsOn: 1 }),
-        end: endOfWeek(new Date(), { weekStartsOn: 1 }),
+  const { routeState, setRouteState, setRouteValue, isInitializing } =
+    useRouteState<RouteStateProps>({
+      stateKey: "state",
+      defaultValues: {
+        currentRange: {
+          start: startOfWeek(new Date(), { weekStartsOn: 1 }),
+          end: endOfWeek(new Date(), { weekStartsOn: 1 }),
+        },
+        view: WEEK_VIEW,
       },
-      view: WEEK_VIEW,
-    },
-    onLoad: (state) => {
-      const view = state?.view || WEEK_VIEW;
-      if (calendarRef.current) {
-        const calendarApi = calendarRef.current.getApi();
-        calendarApi.changeView(view);
-        calendarApi.gotoDate(state?.currentRange?.start || new Date());
-      }
-    },
-  });
+      onLoad: (state) => {
+        const view = state?.view || WEEK_VIEW;
+        getCalendarApi().changeView(view);
+        getCalendarApi().gotoDate(state?.currentRange?.start || new Date());
+      },
+    });
+
+  const calendarApi = calendarRef.current?.getApi();
 
   const currentRange = routeState?.currentRange;
 
-  const setCurrentRange = (value: any) => setRouteValue("currentRange", value);
+  const enableQuery = isInitializing === false && !!currentRange?.start && !!currentRange?.end;
 
   const queryCitas = useQuery<any>(
     ["citas", currentRange],
     () => citaService.listByRange(currentRange.start, currentRange.end),
     {
-      enabled: !!currentRange?.start && !!currentRange?.end, // Solo habilitar cuando hay un rango definido,
+      enabled: enableQuery,
       onSuccess: (citas) => {
         op.current.hide();
         opNotas.current.hide();
@@ -103,7 +107,7 @@ const DashboardPage = () => {
     ["notas", currentRange],
     () => notasService.listByRange(currentRange.start, currentRange.end),
     {
-      enabled: !!currentRange?.start && !!currentRange?.end,
+      enabled: enableQuery,
       onSuccess: (data) => {
         const iconClassName = "calendar__header__icon";
 
@@ -202,20 +206,22 @@ const DashboardPage = () => {
     }
 
     const newRange = {
-      start: startOfWeek(dateInfo.start, { weekStartsOn: 1 }), // Empieza el lunes
-      end: endOfWeek(dateInfo.start, { weekStartsOn: 1 }), // Termina el domingo
+      start: startOfWeek(dateInfo.start, { weekStartsOn: 1 }),
+      end: endOfWeek(dateInfo.start, { weekStartsOn: 1 }),
     };
 
     if (
       !isEqual(newRange.start, currentRange?.start) ||
       !isEqual(newRange.end, currentRange?.end)
     ) {
-      setCurrentRange(newRange);
+      setRouteState({
+        currentRange: newRange,
+        view: dateInfo.view.type,
+      });
     }
   };
 
-  //@ts-ignore
-  const isWeekView = calendarRef.current?.getApi()?.currentData?.currentViewType === WEEK_VIEW;
+  const isWeekView = getCalendarApi()?.view?.type === WEEK_VIEW;
 
   useEffect(() => {
     const getDateFromHeader = (event: any) => {
@@ -226,12 +232,7 @@ const DashboardPage = () => {
     const onDoubleClickDayHeader = (event: any) => {
       opNotas.current.hide();
       const date = getDateFromHeader(event);
-      if (date && calendarRef.current) {
-        const calendarApi = calendarRef.current.getApi();
-        setRouteValue("view", "timeGridDay");
-        setRouteValue("date", date);
-        calendarApi.changeView("timeGridDay", date);
-      }
+      calendarApi.changeView(DAY_VIEW, date);
     };
 
     const onOneClickDayHeader = async (event: any) => {
@@ -254,7 +255,7 @@ const DashboardPage = () => {
         header.removeEventListener("click", handleDayHeaderClick);
       });
     };
-  }, [currentRange]);
+  }, [currentRange, isWeekView]);
 
   const handlePagar = async () => {
     op.current.hide();
@@ -271,26 +272,8 @@ const DashboardPage = () => {
   const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
 
   useEffect(() => {
-    const handleOnClickButton = (view: string) => () => setRouteValue("view", view);
-
-    const weekButton = document.querySelector(".fc-timeGridWeek-button");
-    const dayButton = document.querySelector(".fc-timeGridDay-button");
-
-    const handleWeek = handleOnClickButton(WEEK_VIEW);
-
-    const handleDay = handleOnClickButton("timeGridDay");
-
-    weekButton.addEventListener("click", handleWeek);
-
-    dayButton.addEventListener("click", handleDay);
-
     addIconInButton(".fc-customReload-button", "fa fa-solid fa-rotate");
     addIconInButton(".fc-customConfig-button", "fa fa-solid fa-gear");
-
-    return () => {
-      weekButton.removeEventListener("click", handleWeek);
-      dayButton.removeEventListener("click", handleDay);
-    };
   }, []);
 
   const [calcHeight, setCalcHeight] = useState(0);
@@ -491,7 +474,7 @@ const DashboardPage = () => {
         headerToolbar={{
           left: "prev,today,next",
           center: "title",
-          right: "customConfig,customReload,timeGridWeek,timeGridDay", // Solo las vistas de semana y día
+          right: "customConfig,customReload,customWeek,customDay", // Solo las vistas de semana y día
         }}
         buttonText={{
           today: "Hoy",
@@ -503,6 +486,22 @@ const DashboardPage = () => {
             click: () => {
               queryCitas.refetch();
               queryNotas.refetch();
+            },
+          },
+
+          customWeek: {
+            text: "Semana",
+            click: (evt) => {
+              calendarApi.changeView(WEEK_VIEW);
+              setRouteValue("view", WEEK_VIEW);
+            },
+          },
+
+          customDay: {
+            text: "Día",
+            click: () => {
+              calendarApi.changeView(DAY_VIEW);
+              setRouteValue("view", DAY_VIEW);
             },
           },
         }}
