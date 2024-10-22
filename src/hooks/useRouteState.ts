@@ -1,4 +1,4 @@
-import { set } from "lodash";
+import { merge, set } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import superjson from "superjson";
@@ -76,9 +76,10 @@ const useRouteState = <T extends object>({
   };
 
   const setRouteState = (stateValue: T, action: ActionRouter = "push") => {
-    const params = serializeState(stateValue);
+    const newState = merge(state, stateValue);
+    const params = serializeState(newState);
     router[action](`${pathname}?${params.toString()}`);
-    setState(stateValue);
+    setState(newState);
   };
 
   useEffect(() => {
