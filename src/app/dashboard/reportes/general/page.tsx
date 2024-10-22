@@ -4,7 +4,7 @@ import useRouteState from "@/hooks/useRouteState";
 import { CitaService } from "@/services/citas/citas.service";
 import { getTextColorForBackground } from "@/utils/color";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { addDays } from "date-fns";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { map } from "lodash";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
@@ -12,31 +12,23 @@ import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { Toolbar } from "primereact/toolbar";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
 import { useQuery } from "react-query";
 
 const citaService = new CitaService();
 
 const ReporteGeneralPage = () => {
-  const { routeState, setRouteValue } = useRouteState<{ start: Date; end: Date }>();
+  const { routeState, setRouteState } = useRouteState<{ start: Date; end: Date }>({
+    defaultValues: {
+      start: startOfMonth(new Date()),
+      end: endOfMonth(new Date()),
+    },
+  });
 
   const startDate = routeState?.start;
 
   const endDate = routeState?.end;
-
-  const setStartDate = (value: Date) => setRouteValue("start", value);
-
-  const setEndDate = (value: Date) => setRouteValue("end", value);
-
-  useEffect(() => {
-    if (!startDate) {
-      setStartDate(new Date());
-    }
-    if (!endDate) {
-      setEndDate(addDays(new Date(), 7));
-    }
-  }, []);
 
   const [data, setData] = useState({});
 
@@ -71,8 +63,11 @@ const ReporteGeneralPage = () => {
 
   const onChange = (dates) => {
     const [start, end] = dates;
-    setStartDate(start);
-    setEndDate(end);
+
+    setRouteState({
+      start,
+      end,
+    });
   };
 
   const [selectedEstado, setSelectedEstado] = useState(null);
