@@ -53,7 +53,8 @@ const ModalConfig = ({ show, setShow }) => {
       breakpoints={{
         "641px": "100vw",
         "999999px": "75vw",
-      }}>
+      }}
+      dismissableMask>
       <div className='flex flex-column justify-content-center text-center'>
         <p className='font-semibold'>Ocultar días:</p>
         <SelectButton
