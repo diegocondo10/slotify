@@ -81,6 +81,12 @@ const useRouteState = <T extends object>({
     setState(stateValue);
   };
 
+  useEffect(() => {
+    if (isInitializing === false) {
+      setState(extractRouteState());
+    }
+  }, [searchParams]);
+
   return {
     routeState: state,
     setRouteValue,

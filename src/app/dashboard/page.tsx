@@ -35,6 +35,7 @@ import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
 import CalendarLoader from "./components/CalendarLoader";
 import OverlayPanelNotas from "./components/OverlayPanelNotas";
+import ModalConfig from "./components/ModalConfig";
 
 const citaService = new CitaService();
 const estadoService = new EstadoCitaService();
@@ -51,6 +52,7 @@ type RouteStateProps = {
     end: Date;
   };
   view: string;
+  hiddenDays?: number[];
 };
 
 const WEEK_VIEW = "timeGridWeek";
@@ -66,6 +68,8 @@ const DashboardPage = () => {
   const getCalendarApi = () => calendarRef.current?.getApi();
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [selectedDateHeader, setSelectedDateHeader] = useState<string>(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+
   const toast = useToasts();
 
   const { routeState, setRouteState, setRouteValue, isInitializing } =
@@ -77,6 +81,7 @@ const DashboardPage = () => {
           end: endOfWeek(new Date(), { weekStartsOn: 1 }),
         },
         view: WEEK_VIEW,
+        hiddenDays: [],
       },
       onLoad: (state) => {
         const view = state?.view || WEEK_VIEW;
@@ -331,6 +336,8 @@ const DashboardPage = () => {
                   {format(record.end, "hh:mm a")}
                 </div>,
               ],
+              ["Notas", record.extendedProps?.notas],
+              ["Tareas", record.extendedProps?.tareas],
             ]}
           />
         )}
@@ -354,7 +361,12 @@ const DashboardPage = () => {
                   variant='info'
                   icon={PrimeIcons.PENCIL}
                   rounded
-                  href={`/dashboard/cita?action=${CrudActions.UPDATE}&id=${selectedEvent.id}`}
+                  onClick={() => {
+                    const goBackTo = getCurrentPathEncoded();
+                    router.push(
+                      `/dashboard/cita?action=${CrudActions.UPDATE}&id=${selectedEvent.id}&goBackTo=${goBackTo}`
+                    );
+                  }}
                 />
                 <Button
                   className='mx-1'
@@ -437,6 +449,8 @@ const DashboardPage = () => {
         refetchNotas={queryNotas.refetch}
       />
 
+      <ModalConfig show={showConfigModal} setShow={setShowConfigModal} />
+
       <FullCalendar
         ref={calendarRef}
         nowIndicator
@@ -482,13 +496,17 @@ const DashboardPage = () => {
           day: "Día",
         }}
         customButtons={{
+          customConfig: {
+            click: () => {
+              setShowConfigModal(true);
+            },
+          },
           customReload: {
             click: () => {
               queryCitas.refetch();
               queryNotas.refetch();
             },
           },
-
           customWeek: {
             text: "Semana",
             click: (evt) => {
@@ -496,7 +514,6 @@ const DashboardPage = () => {
               setRouteValue("view", WEEK_VIEW);
             },
           },
-
           customDay: {
             text: "Día",
             click: () => {
@@ -519,7 +536,7 @@ const DashboardPage = () => {
           return format(info.date, "hh:mm a").toUpperCase();
         }}
         firstDay={1}
-        // hiddenDays={[0, 5, 6]}
+        hiddenDays={routeState?.hiddenDays || []}
         eventDrop={handleEventDrop} // Manejador para cuando se arrastra y suelta un evento
         eventClick={handleEventClick} // Manejador para clic en un evento
         dragRevertDuration={300}
