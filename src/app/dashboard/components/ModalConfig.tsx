@@ -39,7 +39,9 @@ const ModalConfig = ({ show, setShow }) => {
   });
 
   const handleOnChange = (evt: SelectButtonChangeEvent) => {
-    setRouteValue("hiddenDays", evt.value);
+    if (evt?.value?.length !== 7) {
+      setRouteValue("hiddenDays", evt.value);
+    }
   };
 
   return (
@@ -51,11 +53,12 @@ const ModalConfig = ({ show, setShow }) => {
       header='Configuraciones'
       draggable={false}
       breakpoints={{
-        "641px": "100vw",
-        "999999px": "75vw",
+        "960px": "75vw",
+        "641px": "90vw",
       }}
       dismissableMask>
       <div className='flex flex-column justify-content-center text-center'>
+        <hr className='w-full my-3' />
         <p className='font-semibold'>Ocultar días:</p>
         <SelectButton
           className='hidden_days'

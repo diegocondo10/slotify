@@ -34,8 +34,9 @@ import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
 import { useQuery } from "react-query";
 import CalendarLoader from "./components/CalendarLoader";
-import OverlayPanelNotas from "./components/OverlayPanelNotas";
 import ModalConfig from "./components/ModalConfig";
+import OverlayPanelNotas from "./components/OverlayPanelNotas";
+import SummaryFooter from "./components/SummaryFooter";
 
 const citaService = new CitaService();
 const estadoService = new EstadoCitaService();
@@ -133,6 +134,7 @@ const DashboardPage = () => {
   const queryEstados = useQuery(["estados_citas"], () => estadoService.listAsLabelValue());
   const eventos: any[] = queryCitas?.data?.eventos || [];
   const summary: SummaryType = queryCitas.data?.summary || {};
+  const hiddenDays = routeState?.hiddenDays || [];
 
   const handleEventClick = createClickHandler<EventClickArg>((info: EventClickArg) => {
     //@ts-ignore
@@ -536,7 +538,7 @@ const DashboardPage = () => {
           return format(info.date, "hh:mm a").toUpperCase();
         }}
         firstDay={1}
-        hiddenDays={routeState?.hiddenDays || []}
+        hiddenDays={hiddenDays}
         eventDrop={handleEventDrop} // Manejador para cuando se arrastra y suelta un evento
         eventClick={handleEventClick} // Manejador para clic en un evento
         dragRevertDuration={300}
@@ -548,26 +550,7 @@ const DashboardPage = () => {
         longPressDelay={300} // Reduce el tiempo necesario para empezar a arrastrar en dispositivos móviles
         dragScroll={false} // Permite que la vista se desplace mientras arrastras un evento
       />
-
-      {isWeekView && (
-        <div className='grid-sumary-container' id='summary_toolbar'>
-          <div className='grid-sumary-item text-center py-2 px-0 mx-0'>
-            <p className='p-0 m-0'>Atendidos</p>
-          </div>
-          {Object.entries(summary).map(([key, value]) => (
-            <div className='grid-sumary-item flex flex-column justify-content-around' key={key}>
-              {Object.entries(value).map(([codigoEstado, sumario]) => (
-                <Tag
-                  key={key + codigoEstado}
-                  className='text-left'
-                  style={{ backgroundColor: sumario.color, color: sumario.textColor }}>
-                  {sumario.total}
-                </Tag>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
+      {isWeekView && <SummaryFooter summary={summary} hiddenDays={hiddenDays} />}
     </div>
   );
 };

@@ -13,8 +13,8 @@ import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { Toolbar } from "primereact/toolbar";
 import { useMemo, useState } from "react";
-import DatePicker from "react-datepicker";
 import { useQuery } from "react-query";
+import DateRange from "../components/DateRange";
 
 const citaService = new CitaService();
 
@@ -63,11 +63,7 @@ const ReporteGeneralPage = () => {
 
   const onChange = (dates) => {
     const [start, end] = dates;
-
-    setRouteState({
-      start,
-      end,
-    });
+    setRouteState({ start, end });
   };
 
   const [selectedEstado, setSelectedEstado] = useState(null);
@@ -135,16 +131,7 @@ const ReporteGeneralPage = () => {
       </div>
 
       <div className='col-10 md:col-8 lg:col-4 text-center mb-4'>
-        <DatePicker
-          wrapperClassName='w-full'
-          className='w-full p-inputtext p-component font-semibold text-center uppercase'
-          selectsRange
-          dateFormat='dd/MMM/yyyy'
-          selected={startDate}
-          onChange={onChange}
-          startDate={startDate}
-          endDate={endDate}
-        />
+        <DateRange startDate={startDate} endDate={endDate} onChange={onChange} />
       </div>
 
       <div className='col-12'>
