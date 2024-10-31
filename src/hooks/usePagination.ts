@@ -7,7 +7,7 @@ import {
   DataTableFilterMetaData,
   DataTableSortMeta,
 } from "primereact/datatable";
-import { useCallback, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 import { QueryKey, useQuery, UseQueryResult } from "react-query";
 
 interface PaginationOptions {
@@ -65,8 +65,9 @@ const usePagination = <TData extends ResponseApi<any>>({
   page: number;
   setPage: (page: number) => void;
   filters: DataTableFilterMeta;
-  setFilters: (filters: DataTableFilterMeta) => void;
+  setFilters: Dispatch<SetStateAction<DataTableFilterMeta>>;
   tableProps: DataTableBaseProps<any>;
+  setFilterValue: (key: string, value: any) => void;
 } => {
   const [page, setPage] = useState(0);
   const [filters, setFilters] = useState<DataTableFilterMeta>(defaultFilters);
@@ -99,6 +100,16 @@ const usePagination = <TData extends ResponseApi<any>>({
     }
   );
 
+  const setFilterValue = (key: string, value: any) => {
+    setFilters({
+      ...filters,
+      [key]: {
+        value: value,
+        matchMode: null,
+      },
+    });
+  };
+
   return {
     ...query,
     page,
@@ -106,6 +117,7 @@ const usePagination = <TData extends ResponseApi<any>>({
     filters,
     setFilters,
     isQueryLoading: query.isLoading || query.isFetching,
+    setFilterValue,
     tableProps: {
       onPage: (event) => {
         setPage(event.page);
@@ -119,6 +131,7 @@ const usePagination = <TData extends ResponseApi<any>>({
       first: page,
       loading: query.isLoading || query.isFetching,
       multiSortMeta: multiSortMeta,
+
       onSort: (event) => setMultiSortMeta(event.multiSortMeta),
       ...query.data?.data,
     },

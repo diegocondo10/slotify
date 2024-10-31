@@ -81,16 +81,12 @@ const CitaPage = ({ searchParams }) => {
     },
   });
 
-  const queryClientes = useQuery(
-    ["clientes_list_label_value"],
-    () => tagService.listAsLabelValue(),
-    {
-      onSuccess: (data) => {
-        setTags(data);
-        setTagsIndex(keyBy(data, "value"));
-      },
-    }
-  );
+  const queryClientes = useQuery(["tags_list_label_value"], () => tagService.listAsLabelValue(), {
+    onSuccess: (data) => {
+      setTags(data);
+      setTagsIndex(keyBy(data, "value"));
+    },
+  });
 
   useQuery(["cita", id], () => new CitaService().retrieve(id), {
     enabled: !!id && isUpdate && queryClientes.isFetching === false,
@@ -128,7 +124,6 @@ const CitaPage = ({ searchParams }) => {
       formData.horaInicio = formatToTimeString(formData.horaInicio);
       formData.horaFin = formatToTimeString(formData.horaFin);
       formData.tag = formData.tag.value;
-      console.log("FORM DATA: ", formData);
       await mutation.submitForm(formData);
       router.push(extractGoBackTo());
     } catch (error) {

@@ -3,18 +3,24 @@ import PageTitle from "@/components/pages/PageTitle";
 import IndexColumn from "@/components/Tables/IndexColumn";
 import useRouteState from "@/hooks/useRouteState";
 import { CitaService } from "@/services/citas/citas.service";
+import { TagCitaService } from "@/services/citas/tagCita.service";
 import { getTextColorForBackground } from "@/utils/color";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { endOfMonth, startOfMonth } from "date-fns";
+import { map, uniq } from "lodash";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
+import { Toolbar } from "primereact/toolbar";
+import { useMemo, useState } from "react";
 import { MdOutlinePaid } from "react-icons/md";
 import { useQuery } from "react-query";
 import DateRange from "../components/DateRange";
 
 const citaService = new CitaService();
+const tagService = new TagCitaService();
 
 const PayReportPage = () => {
   const { routeState, setRouteState } = useRouteState<{ start: Date; end: Date }>({
@@ -24,6 +30,8 @@ const PayReportPage = () => {
     },
   });
 
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [tags, setTags] = useState([]);
   const startDate = routeState?.start;
   const endDate = routeState?.end;
 
@@ -32,6 +40,9 @@ const PayReportPage = () => {
     () => citaService.payReport(startDate, endDate),
     {
       enabled: !!startDate && !!endDate,
+      onSuccess: (data) => {
+        setTags(uniq(map(data.appointments, "label")));
+      },
     }
   );
 
@@ -39,6 +50,14 @@ const PayReportPage = () => {
     const [start, end] = dates;
     setRouteState({ start, end });
   };
+
+  const appointments = useMemo(() => {
+    const data = queryReport?.data?.appointments || [];
+    if (!selectedTag) {
+      return data;
+    }
+    return data.filter((item) => item.label === selectedTag);
+  }, [queryReport?.data, selectedTag]);
 
   return (
     <div className='grid grid-nogutter justify-content-center'>
@@ -95,7 +114,7 @@ const PayReportPage = () => {
                 anchor: "center",
                 align: "center",
                 font: {
-                  size: 20, 
+                  size: 20,
                   weight: "semi-bold",
                 },
                 formatter: (value) => {
@@ -117,20 +136,36 @@ const PayReportPage = () => {
       {queryReport.isFetched && queryReport?.data && (
         <div className='col-11 my-4'>
           <DataTable
-            value={queryReport.data?.appointments}
+            value={appointments}
             className='border-1 border-gray-200'
             stripedRows
             showGridlines
             size='small'
             rowHover
             paginator
-            rows={10}
-            rowsPerPageOptions={[10, 20, 50]}
+            rows={30}
+            rowsPerPageOptions={[30, 40, 50]}
             paginatorTemplate='FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown'
-            currentPageReportTemplate='{totalRecords} Registros'>
+            currentPageReportTemplate='{totalRecords} Registros'
+            header={
+              <Toolbar
+                start={
+                  <Dropdown
+                    className='w-20rem'
+                    options={tags}
+                    filter
+                    filterInputAutoFocus
+                    value={selectedTag}
+                    onChange={({ value }) => setSelectedTag(value)}
+                    showClear
+                    placeholder='Seleccione...'
+                  />
+                }
+              />
+            }>
             {IndexColumn()}
 
-            <Column header='Título' field='label' />
+            <Column header='Nombre' field='label' />
             <Column header='Citas' field='count' className='text-center' />
             {queryReport?.data?.statusStats.map((status) => (
               <Column

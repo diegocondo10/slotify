@@ -46,4 +46,6 @@ const SummaryFooter: React.FC<SummaryFooterProps> = React.memo(({ summary, hidde
   );
 });
 
+SummaryFooter.displayName = "SummaryFooter";
+
 export default SummaryFooter;

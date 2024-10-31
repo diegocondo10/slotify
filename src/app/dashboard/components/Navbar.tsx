@@ -81,6 +81,11 @@ const Navbar = () => {
                 icon: PrimeIcons.WALLET,
                 command: lazyPush(router, "/dashboard/reportes/pagos"),
               },
+              {
+                label: "Citas",
+                icon: PrimeIcons.WALLET,
+                command: lazyPush(router, "/dashboard/reportes/appointments"),
+              },
             ],
           },
         ]}
