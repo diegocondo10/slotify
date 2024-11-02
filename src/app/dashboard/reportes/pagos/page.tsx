@@ -134,7 +134,7 @@ const PayReportPage = () => {
       </div>
 
       {queryReport.isFetched && queryReport?.data && (
-        <div className='col-11 my-4'>
+        <div className='col-11 mt-4 mb-8'>
           <DataTable
             value={appointments}
             className='border-1 border-gray-200'

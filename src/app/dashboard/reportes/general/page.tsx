@@ -4,7 +4,7 @@ import useRouteState from "@/hooks/useRouteState";
 import { CitaService } from "@/services/citas/citas.service";
 import { getTextColorForBackground } from "@/utils/color";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { endOfMonth, startOfMonth } from "date-fns";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import { map } from "lodash";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
@@ -172,7 +172,7 @@ const ReporteGeneralPage = () => {
       </div>
 
       {!queryReporteList.isFetching && (
-        <div className='col-11 my-4'>
+        <div className='col-11 mt-4 mb-8'>
           <DataTable
             header={
               <Toolbar
@@ -207,22 +207,29 @@ const ReporteGeneralPage = () => {
               }}
             />
             <Column header='Título' field='titulo' />
-            <Column header='Fecha' field='fecha' className='text-center' />
-            <Column header='Duración' field='duracion' className='text-center' />
+            <Column
+              header='Fecha'
+              field='fecha'
+              className='text-center w-10rem'
+              body={(rowData) => (
+                <p className='m-0 p-0 w-10rem mx-auto'>{format(rowData.fecha, "dd/MMM/yyy")}</p>
+              )}
+            />
+            {/* <Column header='Duración' field='duracion' className='text-center' /> */}
             <Column
               header='Estado'
+              className='text-center'
+              style={{ minWidth: "11rem", maxWidth: "15rem" }}
               body={(rowData) => (
-                <div>
-                  <Tag
-                    role='button'
-                    className='py-2 w-full m-0'
-                    style={{
-                      backgroundColor: rowData.backgroundColor,
-                      color: rowData.color,
-                    }}>
-                    {rowData.estado}
-                  </Tag>
-                </div>
+                <Tag
+                  role='button'
+                  className='py-2 w-full m-0'
+                  style={{
+                    backgroundColor: rowData.backgroundColor,
+                    color: rowData.color,
+                  }}>
+                  {rowData.estado}
+                </Tag>
               )}
             />
           </DataTable>
