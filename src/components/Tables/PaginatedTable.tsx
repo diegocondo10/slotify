@@ -9,7 +9,7 @@ export interface PaginatedTableProps<TValue extends DataTableValueArray>
 }
 
 const defaultProps: Partial<PaginatedTableProps<any>> = {
-  rowHover: true,
+  rowHover: false,
   paginator: true,
   stripedRows: true,
   showGridlines: true,

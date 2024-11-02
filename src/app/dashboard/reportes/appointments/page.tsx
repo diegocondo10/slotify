@@ -7,7 +7,7 @@ import { CITAS_URLS } from "@/services/citas/citas.urls";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { TagCitaService } from "@/services/citas/tagCita.service";
 import { toBackDate, toFrontDate } from "@/utils/date";
-import { simulateTouch } from "@/utils/events";
+import { format } from "date-fns";
 import { FilterMatchMode } from "primereact/api";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
@@ -40,7 +40,7 @@ const AppointmentsReportPage = () => {
         matchMode: FilterMatchMode.EQUALS,
       },
       pagada: {
-        value: "",
+        value: null,
         matchMode: FilterMatchMode.IN,
       },
     },
@@ -57,22 +57,26 @@ const AppointmentsReportPage = () => {
       <div className='col-12'>
         <PaginatedTable {...pagination.tableProps}>
           <Column
+            style={{ minWidth: "20rem" }}
             header='Nombre'
             field='titulo'
             showFilterMenu={false}
+            showClearButton={false}
             filter
             filterField='tag'
             filterElement={(filterProps) => (
               <MultiSelectFilter
                 filterProps={filterProps}
+                showClear
                 options={queryTags?.data || []}
                 loading={pagination.isQueryLoading}
                 disabled={pagination.isQueryLoading}
               />
             )}
+            body={(rowData) => <p className='m-0'>{rowData.titulo}</p>}
           />
           <Column
-            className='text-center'
+            className='text-center w-10rem'
             header='Fecha'
             field='fecha'
             showFilterMenu={false}
@@ -116,17 +120,23 @@ const AppointmentsReportPage = () => {
                 />
               );
             }}
+            showClearButton={false}
+            body={(rowData) => (
+              <p className='m-0 p-0 w-10rem mx-auto'>{format(rowData.fecha, "dd/MMM/yyy")}</p>
+            )}
           />
           <Column
-            className='text-center'
+            className='text-center w-10rem'
             header='Pagada'
-            body={(rowData) => (rowData?.isPagada ? "SI" : "NO")}
+            body={(rowData) => <p className='p-0 m-0 mx-auto'>{rowData?.isPagada ? "SI" : "NO"}</p>}
             showFilterMenu={false}
+            showClearButton={false}
             filter
             filterField='pagada'
             filterElement={(filterProps) => (
               <Dropdown
                 options={["SI", "NO"]}
+                showClear
                 value={filterProps.value}
                 onChange={(e) => filterProps.filterApplyCallback(e.value)}
                 placeholder='Seleccione'
@@ -135,29 +145,31 @@ const AppointmentsReportPage = () => {
               />
             )}
           />
-          <Column className='text-center' header='Duración' field='duracionHoras' />
+          {/* <Column className='text-center' header='Duración' field='duracionHoras' /> */}
           <Column
             header='Estado'
+            className='text-center'
+            style={{ minWidth: "11rem", maxWidth: "15rem" }}
             body={(rowData) => (
-              <div>
-                <Tag
-                  role='button'
-                  className='py-2 w-full m-0'
-                  style={{
-                    backgroundColor: rowData.estado.styles.backgroundColor,
-                    color: rowData.estado.styles.color,
-                  }}>
-                  {rowData.estado.label}
-                </Tag>
-              </div>
+              <Tag
+                role='button'
+                className='py-2 w-full m-0'
+                style={{
+                  backgroundColor: rowData.estado.styles.backgroundColor,
+                  color: rowData.estado.styles.color,
+                }}>
+                {rowData.estado.label}
+              </Tag>
             )}
             showFilterMenu={false}
+            showClearButton={false}
             filter
             filterField='estado'
             filterElement={(filterProps) => (
               <MultiSelectFilter
                 filterProps={filterProps}
                 optionValue='value.id'
+                showClear
                 options={queryEstados?.data || []}
                 loading={pagination.isQueryLoading}
                 disabled={pagination.isQueryLoading}

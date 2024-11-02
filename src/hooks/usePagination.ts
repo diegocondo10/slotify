@@ -1,4 +1,5 @@
 import API from "@/services/api";
+import { simulateTouch } from "@/utils/events";
 import { AxiosError, AxiosResponse } from "axios";
 import debounce from "lodash/debounce";
 import {
@@ -97,6 +98,9 @@ const usePagination = <TData extends ResponseApi<any>>({
       cacheTime: 0,
       refetchOnWindowFocus: false,
       isDataEqual: () => false,
+      onSuccess: () => {
+        simulateTouch();
+      },
     }
   );
 
