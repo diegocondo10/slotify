@@ -1,3 +1,4 @@
+import { PK } from "@/types/api";
 import { BaseURLs } from "../types";
 
 export interface TagCitaUrls extends BaseURLs {
@@ -5,6 +6,10 @@ export interface TagCitaUrls extends BaseURLs {
 }
 
 export const TAG_CITA_URLS: TagCitaUrls = {
-  listAsLabelValue: "citas/tags/label-value/",
-  create: "citas/tags/",
+  list: "tags/",
+  listAsLabelValue: "tags/label-value/",
+  create: "tags/",
+  update: (pk: PK) => `tags/${pk}/`,
+  delete: (pk: PK) => `tags/${pk}/`,
+  retrieve: (pk: PK) => `tags/${pk}/`,
 };

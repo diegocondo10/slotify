@@ -68,6 +68,11 @@ const Navbar = () => {
             command: lazyPush(router, "/dashboard"),
           },
           {
+            label: "Tags",
+            icon: PrimeIcons.LIST,
+            command: lazyPush(router, "/dashboard/tags"),
+          },
+          {
             label: "Reportes",
             icon: PrimeIcons.PRINT,
             items: [
@@ -83,7 +88,7 @@ const Navbar = () => {
               },
               {
                 label: "Citas",
-                icon: PrimeIcons.WALLET,
+                icon: PrimeIcons.LIST,
                 command: lazyPush(router, "/dashboard/reportes/appointments"),
               },
             ],

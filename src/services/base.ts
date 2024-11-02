@@ -133,7 +133,8 @@ export abstract class BaseService<T extends BaseURLs> {
   protected handleError(error: any): never {
     if (isAxiosError(error) && error.response) {
       const { data } = error.response;
-      throw new ApiException("API Error", data.errors);
+      console.log("RESPONSE ERROR: ", error.response);
+      throw new ApiException("API Error", data);
     }
     throw new Error("Unexpected Error");
   }
