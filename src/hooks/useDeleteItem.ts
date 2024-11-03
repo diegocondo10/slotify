@@ -1,10 +1,14 @@
-import { BaseException } from '@/services/service.exceptions';
-import { MutationFunction, useMutation } from 'react-query';
-import useToasts from './useToasts';
+import { BaseException } from "@/services/exceptions";
+import { MutationFunction, useMutation } from "react-query";
+import useToasts from "./useToasts";
 
 interface UseDeleteItemProps<TData, TVariables, TContext = unknown> {
   mutationFn: MutationFunction<TData, TVariables>;
-  onSuccess?: (data: TData, variables: TVariables, context: TContext | undefined) => Promise<unknown> | void;
+  onSuccess?: (
+    data: TData,
+    variables: TVariables,
+    context: TContext | undefined
+  ) => Promise<unknown> | void;
 }
 
 const useDeleteItem = ({ mutationFn, onSuccess }: UseDeleteItemProps<any, any>) => {
