@@ -1,18 +1,20 @@
 "use client";
+import Button from "@/components/Buttons/Button";
 import PageTitle from "@/components/pages/PageTitle";
 import MultiSelectFilter from "@/components/Tables/filters/MultiSelectFilter";
 import PaginatedTable from "@/components/Tables/PaginatedTable";
 import usePagination from "@/hooks/usePagination";
+import { CitaService } from "@/services/citas/citas.service";
 import { CITAS_URLS } from "@/services/citas/citas.urls";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { TagCitaService } from "@/services/citas/tagCita.service";
 import { toBackDate, toFrontDate } from "@/utils/date";
-import { format } from "date-fns";
-import { FilterMatchMode } from "primereact/api";
-import { Calendar } from "primereact/calendar";
+import { downloadReport } from "@/utils/file";
+import { FilterMatchMode, PrimeIcons } from "primereact/api";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
+import DatePicker from "react-datepicker";
 import { useQuery } from "react-query";
 
 const tagService = new TagCitaService();
@@ -55,7 +57,16 @@ const AppointmentsReportPage = () => {
       </div>
 
       <div className='col-12'>
-        <PaginatedTable {...pagination.tableProps}>
+        <PaginatedTable
+          {...pagination.tableProps}
+          paginatorLeft={
+            <Button
+              icon={PrimeIcons.PRINT}
+              onClick={() => {
+                downloadReport(new CitaService().printList(pagination.searchUrl));
+              }}
+            />
+          }>
           <Column
             style={{ minWidth: "20rem" }}
             header='Nombre'
@@ -83,26 +94,22 @@ const AppointmentsReportPage = () => {
             filter
             filterField='fecha'
             filterElement={(filterProps) => {
-              const value = [];
               //@ts-ignore
-              const startDate = pagination.filters?.fecha_after?.value;
-              if (startDate) {
-                value.push(toFrontDate(startDate));
-              }
+              const start = pagination.filters?.fecha_after?.value;
+              const startDate = start ? toFrontDate(start) : start;
+
               //@ts-ignore
-              const endDate = pagination.filters?.fecha_before?.value;
-              if (endDate) {
-                value.push(toFrontDate(endDate));
-              }
+              const end = pagination.filters?.fecha_before?.value;
+              const endDate = end ? toFrontDate(end) : null;
+
               return (
-                <Calendar
-                  placeholder='Seleccione'
-                  selectionMode='range'
-                  value={value}
-                  readOnlyInput
-                  showButtonBar
-                  onChange={(e) => {
-                    const value = e.value;
+                <DatePicker
+                  wrapperClassName='w-full'
+                  className='w-full p-inputtext p-component text-center'
+                  selectsRange
+                  dateFormat='dd/MMM/yyyy'
+                  placeholderText='Seleccione'
+                  onChange={(value) => {
                     const start = value?.[0] || null;
                     const end = value?.[1] || null;
                     pagination.setFilters((old) => ({
@@ -117,13 +124,14 @@ const AppointmentsReportPage = () => {
                       },
                     }));
                   }}
+                  startDate={startDate}
+                  endDate={endDate}
+                  monthsShown={2}
                 />
               );
             }}
             showClearButton={false}
-            body={(rowData) => (
-              <p className='m-0 p-0 w-10rem mx-auto'>{format(rowData.fecha, "dd/MMM/yyy")}</p>
-            )}
+            body={(rowData) => <p className='m-0 p-0 w-10rem mx-auto'>{rowData.fecha}</p>}
           />
           <Column
             className='text-center w-10rem'

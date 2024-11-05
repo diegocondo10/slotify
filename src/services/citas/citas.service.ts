@@ -8,6 +8,10 @@ export class CitaService extends BaseService<CitaUrls> {
     return CITAS_URLS;
   }
 
+  async printList(search: string) {
+    return (await this.privateApi.get(this.urls.printList(search))).data;
+  }
+
   async listByRange(start: Date, end: Date) {
     return (await this.privateApi.get(this.urls.listByRange(toBackDate(start), toBackDate(end))))
       .data;

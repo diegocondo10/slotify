@@ -18,13 +18,12 @@ interface PaginationOptions {
 }
 
 interface BuildUrlParams {
-  url: string;
   page: number;
   filters: DataTableFilterMeta;
   ordering: DataTableSortMeta[];
 }
 
-const buildUrl = ({ url, page, filters = {}, ordering }: BuildUrlParams): string => {
+const buildSearch = ({ page, filters = {}, ordering }: BuildUrlParams): string => {
   const queryString = new URLSearchParams();
   if (ordering) {
     const orderString = ordering
@@ -47,7 +46,7 @@ const buildUrl = ({ url, page, filters = {}, ordering }: BuildUrlParams): string
   });
 
   const queryParams = queryString.toString();
-  return url + (queryParams ? `?${queryParams}` : "");
+  return queryParams ? `?${queryParams}` : "";
 };
 
 interface ResponseApi<T> {
@@ -63,6 +62,7 @@ const usePagination = <TData extends ResponseApi<any>>({
   defaultFilters = {},
 }: PaginationOptions): UseQueryResult<AxiosResponse<TData>, AxiosError> & {
   isQueryLoading: boolean;
+  searchUrl: string;
   page: number;
   setPage: (page: number) => void;
   filters: DataTableFilterMeta;
@@ -75,7 +75,7 @@ const usePagination = <TData extends ResponseApi<any>>({
   const [multiSortMeta, setMultiSortMeta] = useState([]);
 
   const [queryFilters, setQueryFilters] = useState<DataTableFilterMeta>(defaultFilters);
-
+  const [searchUrl, setSearchUrl] = useState("");
   const debouncedFilter = useCallback(
     debounce((newFilters) => {
       setQueryFilters(newFilters);
@@ -90,8 +90,9 @@ const usePagination = <TData extends ResponseApi<any>>({
   const query = useQuery<AxiosResponse<TData>, AxiosError>(
     [key, uri, page, queryFilters, multiSortMeta],
     async ({ signal }) => {
-      const url = buildUrl({ url: uri, page, filters: queryFilters, ordering: multiSortMeta });
-      return API.get<TData>(url, { signal });
+      const search = buildSearch({ page, filters: queryFilters, ordering: multiSortMeta });
+      setSearchUrl(search);
+      return API.get<TData>(uri + search, { signal });
     },
     {
       keepPreviousData: true,
@@ -99,7 +100,7 @@ const usePagination = <TData extends ResponseApi<any>>({
       refetchOnWindowFocus: false,
       isDataEqual: () => false,
       onSuccess: () => {
-        simulateTouch();
+        // simulateTouch();
       },
     }
   );
@@ -122,6 +123,7 @@ const usePagination = <TData extends ResponseApi<any>>({
     setFilters,
     isQueryLoading: query.isLoading || query.isFetching,
     setFilterValue,
+    searchUrl,
     tableProps: {
       onPage: (event) => {
         setPage(event.page);
