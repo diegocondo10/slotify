@@ -430,7 +430,7 @@ const DashboardPage = () => {
             </p>
             <p className='my-1'>
               <strong>Hora:</strong> {format(selectedEvent.start, "hh:mm a")} {" - "}
-              {format(selectedEvent.end, "hh:mm a")}
+              {selectedEvent?.end && format(selectedEvent?.end, "hh:mm a")}
             </p>
             {selectedEvent.extendedProps.hasNotas && (
               <p className='my-1'>
