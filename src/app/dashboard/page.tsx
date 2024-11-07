@@ -5,7 +5,6 @@ import DeleteRecordConfirm from "@/components/DeleteRecordConfirm";
 import RecordDetail from "@/components/DeleteRecordConfirm/RecordDetail";
 import useDeleteRecordConfirm from "@/components/DeleteRecordConfirm/useDeleteRecordConfirm";
 import { CrudActions } from "@/emuns/crudActions";
-import usePreventPullToRefresh from "@/hooks/usePreventPullToRefresh";
 import useRouteState from "@/hooks/useRouteState";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
@@ -62,8 +61,6 @@ const WEEK_VIEW = "timeGridWeek";
 const DAY_VIEW = "timeGridDay";
 
 const DashboardPage = () => {
-  usePreventPullToRefresh();
-
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
   const opNotas = useRef(null);
@@ -476,14 +473,18 @@ const DashboardPage = () => {
           return (
             <div
               role='button'
+              className='h-full flex flex-column align-content-center justify-content-center'
+              style={{ minHeight: "34px" }}
               onClick={createClickHandler(
                 onDoubleClickDayHeader(formatedDate),
                 onOneClickDayHeader(formatedDate)
               )}>
-              {queryNotas?.data?.[formatedDate] && (
-                <i className={classNames(PrimeIcons.FILE, "text-sm mr-1")} />
-              )}
-              {props.text}
+              <div>
+                {queryNotas?.data?.[formatedDate] && (
+                  <i className={classNames(PrimeIcons.FILE, "text-sm mr-1")} />
+                )}
+                {props.text}
+              </div>
             </div>
           );
         }}
