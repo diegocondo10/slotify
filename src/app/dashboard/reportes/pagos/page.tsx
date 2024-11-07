@@ -1,13 +1,16 @@
 "use client";
+import Button from "@/components/Buttons/Button";
 import PageTitle from "@/components/pages/PageTitle";
 import IndexColumn from "@/components/Tables/IndexColumn";
 import useRouteState from "@/hooks/useRouteState";
 import { CitaService } from "@/services/citas/citas.service";
 import { TagCitaService } from "@/services/citas/tagCita.service";
 import { getTextColorForBackground } from "@/utils/color";
+import { downloadReport } from "@/utils/file";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { map, uniq } from "lodash";
+import { PrimeIcons } from "primereact/api";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -159,6 +162,14 @@ const PayReportPage = () => {
                     onChange={({ value }) => setSelectedTag(value)}
                     showClear
                     placeholder='Seleccione...'
+                  />
+                }
+                end={
+                  <Button
+                    icon={PrimeIcons.PRINT}
+                    onClick={() => {
+                      downloadReport(new CitaService().payReportXlsx(startDate, endDate));
+                    }}
                   />
                 }
               />

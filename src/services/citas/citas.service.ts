@@ -12,6 +12,10 @@ export class CitaService extends BaseService<CitaUrls> {
     return await this.requestReport(this.urls.printList(search));
   }
 
+  async payReportXlsx(start: Date, end: Date) {
+    return await this.requestReport(this.urls.payReportXlsx(toBackDate(start), toBackDate(end)));
+  }
+
   async listByRange(start: Date, end: Date) {
     return (await this.privateApi.get(this.urls.listByRange(toBackDate(start), toBackDate(end))))
       .data;
