@@ -1,8 +1,7 @@
 import axios, { CreateAxiosDefaults } from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL; // URL de la API real en SSR desde el servidor
+const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
-console.log("BASE: ", process.env.NEXT_PUBLIC_API_URL);
 const API = axios.create({
   baseURL,
   timeout: 10000,

@@ -21,8 +21,8 @@ import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
+import classNames from "classnames";
 import { endOfWeek, format, startOfWeek } from "date-fns";
-import $ from "jquery";
 import { isEqual } from "lodash";
 import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
@@ -63,12 +63,11 @@ const DAY_VIEW = "timeGridDay";
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
-  const opNotas = useRef<OverlayPanel>(null);
+  const opNotas = useRef(null);
 
   const calendarRef = useRef<FullCalendar>(null);
   const getCalendarApi = () => calendarRef.current?.getApi();
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
-  const [selectedDateHeader, setSelectedDateHeader] = useState<string>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
 
   const toast = useToasts();
@@ -113,25 +112,12 @@ const DashboardPage = () => {
     ["notas", currentRange],
     () => notasService.listByRange(currentRange.start, currentRange.end),
     {
-      enabled: enableQuery,
-      onSuccess: (data) => {
-        const iconClassName = "calendar__header__icon";
-
-        $(`.${iconClassName}`).remove();
-
-        $(".fc-col-header-cell-cushion").each(function () {
-          const date = $(this).closest("th").data("date");
-
-          if (data?.[date]) {
-            const icon = $(`<i class="${iconClassName} fas fa-note-sticky mr-1 text-sm"></i>`);
-            $(this).prepend(icon);
-          }
-        });
-      },
+      enabled: !!currentRange?.start && !!currentRange?.end,
     }
   );
 
   const queryEstados = useQuery(["estados_citas"], () => estadoService.listAsLabelValue());
+
   const eventos: any[] = queryCitas?.data?.eventos || [];
   const summary: SummaryType = queryCitas.data?.summary || {};
   const hiddenDays = routeState?.hiddenDays || [];
@@ -230,40 +216,6 @@ const DashboardPage = () => {
 
   const isWeekView = getCalendarApi()?.view?.type === WEEK_VIEW;
 
-  useEffect(() => {
-    const getDateFromHeader = (event: any) => {
-      const target = event.target.closest(".fc-col-header-cell");
-      return target.getAttribute("data-date");
-    };
-
-    const onDoubleClickDayHeader = (event: any) => {
-      opNotas.current.hide();
-      const date = getDateFromHeader(event);
-      calendarApi.changeView(DAY_VIEW, date);
-    };
-
-    const onOneClickDayHeader = async (event: any) => {
-      const date = getDateFromHeader(event);
-      setSelectedDateHeader(date);
-      //@ts-ignore
-      opNotas.current.toggle(event);
-    };
-
-    const handleDayHeaderClick = createClickHandler(onDoubleClickDayHeader, onOneClickDayHeader);
-
-    const dayHeaders = document.querySelectorAll(".fc-col-header-cell");
-
-    dayHeaders.forEach((header) => {
-      header.addEventListener("click", handleDayHeaderClick);
-    });
-
-    return () => {
-      dayHeaders.forEach((header) => {
-        header.removeEventListener("click", handleDayHeaderClick);
-      });
-    };
-  }, [currentRange, isWeekView]);
-
   const handlePagar = async () => {
     op.current.hide();
     await citaService.pagar(selectedEvent.id);
@@ -307,6 +259,71 @@ const DashboardPage = () => {
       window.removeEventListener("resize", calcularHeight);
     };
   }, [isWeekView]);
+
+  useEffect(() => {
+    const calcularHeight = () => {
+      const viewportHeight = window.innerHeight;
+      const navbarHeight = document.querySelector("#navbar")?.clientHeight || 0;
+      const summaryToolbarHeight = document.querySelector("#summary_toolbar")?.clientHeight || 0;
+      const extraHeigh = isPwaInIOS() ? 20 : 10;
+      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeigh));
+    };
+
+    calcularHeight();
+
+    window.addEventListener("resize", calcularHeight);
+    return () => {
+      window.removeEventListener("resize", calcularHeight);
+    };
+  }, [isWeekView]);
+
+  const onDoubleClickDayHeader = (date: string) => () => {
+    opNotas.current.hide();
+
+    if (date && calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
+      router.push(window.location.pathname + path);
+      calendarApi.changeView("timeGridDay", date);
+    }
+  };
+
+  const onOneClickDayHeader = (date: string) => async (event: any) => {
+    opNotas.current.fetchNota(event, date);
+  };
+
+  useEffect(() => {
+    const handleOnClickButton = (view: string) => () => {
+      const currentPath = window.location.pathname;
+      router.push(`${currentPath}?view=${view}`);
+    };
+
+    const weekButton = document.querySelector(".fc-timeGridWeek-button");
+    const dayButton = document.querySelector(".fc-timeGridDay-button");
+
+    const handleWeek = handleOnClickButton("timeGridWeek");
+    const handleDay = handleOnClickButton("timeGridDay");
+
+    if (weekButton) {
+      weekButton.addEventListener("click", handleWeek);
+    }
+    if (dayButton) {
+      dayButton.addEventListener("click", handleDay);
+    }
+    const reloadButton = document.querySelector(".fc-customReload-button");
+    if (reloadButton) {
+      const iconElement = document.createElement("i");
+      iconElement.classList.add("fa", "fa-solid", "fa-rotate");
+      reloadButton.innerHTML = "";
+      reloadButton.appendChild(iconElement);
+    }
+    return () => {
+      if (weekButton) {
+        weekButton.removeEventListener("click", handleWeek);
+        dayButton.removeEventListener("click", handleDay);
+      }
+    };
+  }, []);
 
   return (
     <div style={{ height: `${calcHeight}px`, width: "100vw" }}>
@@ -428,7 +445,7 @@ const DashboardPage = () => {
             </p>
             <p className='my-1'>
               <strong>Hora:</strong> {format(selectedEvent.start, "hh:mm a")} {" - "}
-              {format(selectedEvent.end, "hh:mm a")}
+              {selectedEvent?.end && format(selectedEvent?.end, "hh:mm a")}
             </p>
             {selectedEvent.extendedProps.hasNotas && (
               <p className='my-1'>
@@ -444,18 +461,29 @@ const DashboardPage = () => {
         )}
       </OverlayPanel>
 
-      <OverlayPanelNotas
-        refOp={opNotas}
-        setSelectedDateHeader={setSelectedDateHeader}
-        selectedDateHeader={selectedDateHeader}
-        refetchNotas={queryNotas.refetch}
-      />
+      <OverlayPanelNotas ref={opNotas} refetchNotas={queryNotas.refetch} />
 
       <ModalConfig show={showConfigModal} setShow={setShowConfigModal} />
 
       <FullCalendar
         ref={calendarRef}
         nowIndicator
+        dayHeaderContent={(props) => {
+          const formatedDate = toBackDate(props.date);
+          return (
+            <div
+              role='button'
+              onClick={createClickHandler(
+                onDoubleClickDayHeader(formatedDate),
+                onOneClickDayHeader(formatedDate)
+              )}>
+              {queryNotas?.data?.[formatedDate] && (
+                <i className={classNames(PrimeIcons.FILE, "text-sm mr-1")} />
+              )}
+              {props.text}
+            </div>
+          );
+        }}
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView={WEEK_VIEW} // Vista inicial en el calendario
         locale='es' // Configura el idioma a español

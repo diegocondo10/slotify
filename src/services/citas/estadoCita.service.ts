@@ -7,6 +7,6 @@ export class EstadoCitaService extends BaseService<EstadoCitaUrls> {
     return ESTADO_CITA_URLS;
   }
   async listAsLabelValue(): Promise<any[]> {
-    return (await this.publicApi.get(this.urls.listAsLabelValue)).data;
+    return (await this.privateApi.get(this.urls.listAsLabelValue)).data;
   }
 }
