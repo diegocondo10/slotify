@@ -77,4 +77,6 @@ const OverlayPanelNotas = forwardRef(({ refetchNotas }: OverlayPanelNotasProps, 
   );
 });
 
+OverlayPanelNotas.displayName = "OverlayPanelNotas";
+
 export default OverlayPanelNotas;
