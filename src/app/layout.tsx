@@ -23,9 +23,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false, // Ya tienes esto correctamente
+  userScalable: false,
   height: "device-height",
-  viewportFit: "cover", // Permite cubrir todo el área visible de la pantalla en dispositivos con notch o barras flotantes.
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({
