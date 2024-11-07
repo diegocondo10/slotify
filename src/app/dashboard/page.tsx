@@ -18,8 +18,8 @@ import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
+import classNames from "classnames";
 import { endOfWeek, format, isEqual, startOfWeek } from "date-fns";
-import $ from "jquery";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -44,11 +44,10 @@ type SummaryType = Record<
 const DashboardPage = () => {
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
-  const opNotas = useRef<OverlayPanel>(null);
+  const opNotas = useRef(null);
   const blurRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
-  const [selectedDateHeader, setSelectedDateHeader] = useState<string>(null);
 
   const [currentRange, setCurrentRange] = useState<{ start: Date; end: Date }>({
     start: null,
@@ -75,18 +74,15 @@ const DashboardPage = () => {
     {
       enabled: !!currentRange.start && !!currentRange.end,
       onSuccess: (data) => {
-        const iconClassName = "calendar__header__icon";
-
-        $(`.${iconClassName}`).remove();
-
-        $(".fc-col-header-cell-cushion").each(function () {
-          const date = $(this).closest("th").data("date");
-
-          if (data?.[date]) {
-            const icon = $(`<i class="${iconClassName} fas fa-note-sticky mr-1 text-sm"></i>`);
-            $(this).prepend(icon);
-          }
-        });
+        // const iconClassName = "calendar__header__icon";
+        // $(`.${iconClassName}`).remove();
+        // $(".fc-col-header-cell-cushion").each(function () {
+        //   const date = $(this).closest("th").data("date");
+        //   if (data?.[date]) {
+        //     const icon = $(`<i class="${iconClassName} fas fa-note-sticky mr-1 text-sm"></i>`);
+        //     $(this).prepend(icon);
+        //   }
+        // });
       },
     }
   );
@@ -180,45 +176,6 @@ const DashboardPage = () => {
   //@ts-ignore
   const isWeekView = calendarRef.current?.getApi()?.currentData?.currentViewType === "timeGridWeek";
 
-  useEffect(() => {
-    const getDateFromHeader = (event: any) => {
-      const target = event.target.closest(".fc-col-header-cell");
-      return target.getAttribute("data-date");
-    };
-
-    const onDoubleClickDayHeader = (event: any) => {
-      opNotas.current.hide();
-      const date = getDateFromHeader(event);
-      if (date && calendarRef.current) {
-        const calendarApi = calendarRef.current.getApi();
-        const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
-        router.push(window.location.pathname + path);
-        calendarApi.changeView("timeGridDay", date);
-      }
-    };
-
-    const onOneClickDayHeader = async (event: any) => {
-      const date = getDateFromHeader(event);
-      setSelectedDateHeader(date);
-      //@ts-ignore
-      opNotas.current.toggle(event);
-    };
-
-    const handleDayHeaderClick = createClickHandler(onDoubleClickDayHeader, onOneClickDayHeader);
-
-    const dayHeaders = document.querySelectorAll(".fc-col-header-cell");
-
-    dayHeaders.forEach((header) => {
-      header.addEventListener("click", handleDayHeaderClick);
-    });
-
-    return () => {
-      dayHeaders.forEach((header) => {
-        header.removeEventListener("click", handleDayHeaderClick);
-      });
-    };
-  }, [currentRange]);
-
   const handlePagar = async () => {
     op.current.hide();
     await citaService.pagar(selectedEvent.id);
@@ -232,6 +189,47 @@ const DashboardPage = () => {
   };
 
   const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
+
+  useEffect(() => {
+    const view = search.get("view") || "timeGridWeek";
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.changeView(view);
+    }
+  }, [search]);
+  const [calcHeight, setCalcHeight] = useState(0);
+
+  useEffect(() => {
+    const calcularHeight = () => {
+      const viewportHeight = window.innerHeight;
+      const navbarHeight = document.querySelector("#navbar")?.clientHeight || 0;
+      const summaryToolbarHeight = document.querySelector("#summary_toolbar")?.clientHeight || 0;
+      const extraHeigh = isPwaInIOS() ? 20 : 10;
+      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeigh));
+    };
+
+    calcularHeight();
+
+    window.addEventListener("resize", calcularHeight);
+    return () => {
+      window.removeEventListener("resize", calcularHeight);
+    };
+  }, [isWeekView]);
+
+  const onDoubleClickDayHeader = (date: string) => () => {
+    opNotas.current.hide();
+
+    if (date && calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
+      router.push(window.location.pathname + path);
+      calendarApi.changeView("timeGridDay", date);
+    }
+  };
+
+  const onOneClickDayHeader = (date: string) => async (event: any) => {
+    opNotas.current.fetchNota(event, date);
+  };
 
   useEffect(() => {
     const handleOnClickButton = (view: string) => () => {
@@ -265,32 +263,6 @@ const DashboardPage = () => {
       }
     };
   }, []);
-
-  useEffect(() => {
-    const view = search.get("view") || "timeGridWeek";
-    if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.changeView(view);
-    }
-  }, [search]);
-  const [calcHeight, setCalcHeight] = useState(0);
-
-  useEffect(() => {
-    const calcularHeight = () => {
-      const viewportHeight = window.innerHeight;
-      const navbarHeight = document.querySelector("#navbar")?.clientHeight || 0;
-      const summaryToolbarHeight = document.querySelector("#summary_toolbar")?.clientHeight || 0;
-      const extraHeigh = isPwaInIOS() ? 20 : 10;
-      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeigh));
-    };
-
-    calcularHeight();
-
-    window.addEventListener("resize", calcularHeight);
-    return () => {
-      window.removeEventListener("resize", calcularHeight);
-    };
-  }, [isWeekView]);
 
   return (
     <div style={{ height: `${calcHeight}px`, width: "100vw" }}>
@@ -446,16 +418,27 @@ const DashboardPage = () => {
         )}
       </OverlayPanel>
 
-      <OverlayPanelNotas
-        refOp={opNotas}
-        setSelectedDateHeader={setSelectedDateHeader}
-        selectedDateHeader={selectedDateHeader}
-        refetchNotas={queryNotas.refetch}
-      />
+      <OverlayPanelNotas ref={opNotas} refetchNotas={queryNotas.refetch} />
 
       <FullCalendar
         ref={calendarRef}
         nowIndicator
+        dayHeaderContent={(props) => {
+          const formatedDate = toBackDate(props.date);
+          return (
+            <div
+              role='button'
+              onClick={createClickHandler(
+                onDoubleClickDayHeader(formatedDate),
+                onOneClickDayHeader(formatedDate)
+              )}>
+              {queryNotas?.data?.[formatedDate] && (
+                <i className={classNames(PrimeIcons.FILE, "text-sm mr-1")} />
+              )}
+              {props.text}
+            </div>
+          );
+        }}
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView='timeGridWeek' // Vista inicial en el calendario
         locale='es' // Configura el idioma a español

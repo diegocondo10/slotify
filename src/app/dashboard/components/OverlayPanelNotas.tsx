@@ -5,51 +5,52 @@ import TextArea from "@/components/Forms/TextArea";
 import Loading from "@/components/Loading";
 import { NotaService } from "@/services/notas/notas.service";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { Dispatch, MutableRefObject, SetStateAction, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useQuery } from "react-query";
 
 const notasService = new NotaService();
 
-const OverlayPanelNotas = ({
-  refOp,
-  selectedDateHeader,
-  setSelectedDateHeader,
-  refetchNotas,
-}: {
-  refOp: MutableRefObject<OverlayPanel>;
-  selectedDateHeader: string;
-  setSelectedDateHeader: Dispatch<SetStateAction<string>>;
+interface OverlayPanelNotasProps {
+  // refOp: MutableRefObject<OverlayPanel>;
+  // selectedDateHeader: string;
+  // setSelectedDateHeader: Dispatch<SetStateAction<string>>;
   refetchNotas: () => void;
-}) => {
+}
+
+const OverlayPanelNotas = forwardRef(({ refetchNotas }: OverlayPanelNotasProps, ref) => {
   const methods = useForm({ mode: "onChange" });
   const [guardando, setGuardando] = useState(false);
-
-  const queryNota = useQuery(
-    [selectedDateHeader, "nota"],
-    () => notasService.oneByDate(selectedDateHeader),
-    {
-      enabled: selectedDateHeader !== null,
-      onSuccess: (data) => {
-        methods.reset(data);
-      },
-    }
-  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedDateHeader, setSelectedDateHeader] = useState(null);
+  const refOp = useRef<OverlayPanel>(null);
 
   const onSubmit = async (formData) => {
     setGuardando(true);
-    console.log(formData);
+
     await notasService.creteOrUpdate(selectedDateHeader, { descripcion: formData.descripcion });
-    setSelectedDateHeader(null);
     setGuardando(false);
     refetchNotas();
   };
 
+  useImperativeHandle(ref, () => ({
+    fetchNota: async (event, date) => {
+      refOp.current.toggle(event);
+      setIsLoading(true);
+      setSelectedDateHeader(date);
+      const response = await notasService.oneByDate(date);
+      methods.reset(response);
+      setIsLoading(false);
+    },
+    hide: () => {
+      refOp.current.hide();
+    },
+  }));
+
   return (
     <OverlayPanel className='mx-auto' style={{ maxWidth: "30rem", minWidth: "20rem" }} ref={refOp}>
-      {queryNota.isFetching && <Loading loading />}
+      {isLoading && <Loading loading />}
 
-      {!queryNota.isFetching && (
+      {!isLoading && (
         <FormProvider {...methods}>
           <FormFieldRender
             label='Notas diarias: '
@@ -74,6 +75,6 @@ const OverlayPanelNotas = ({
       )}
     </OverlayPanel>
   );
-};
+});
 
 export default OverlayPanelNotas;
