@@ -12,7 +12,7 @@ const API = axios.create({
 export const createApi = (config?: CreateAxiosDefaults) => {
   return axios.create({
     baseURL,
-    timeout: 10000,
+    // timeout: 10000,
     headers: {
       "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
     },

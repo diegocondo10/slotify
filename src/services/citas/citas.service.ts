@@ -9,7 +9,7 @@ export class CitaService extends BaseService<CitaUrls> {
   }
 
   async printList(search: string) {
-    return (await this.privateApi.get(this.urls.printList(search))).data;
+    return await this.requestReport(this.urls.printList(search));
   }
 
   async listByRange(start: Date, end: Date) {

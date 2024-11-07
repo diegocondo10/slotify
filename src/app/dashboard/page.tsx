@@ -5,6 +5,7 @@ import DeleteRecordConfirm from "@/components/DeleteRecordConfirm";
 import RecordDetail from "@/components/DeleteRecordConfirm/RecordDetail";
 import useDeleteRecordConfirm from "@/components/DeleteRecordConfirm/useDeleteRecordConfirm";
 import { CrudActions } from "@/emuns/crudActions";
+import usePreventPullToRefresh from "@/hooks/usePreventPullToRefresh";
 import useRouteState from "@/hooks/useRouteState";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
@@ -61,6 +62,8 @@ const WEEK_VIEW = "timeGridWeek";
 const DAY_VIEW = "timeGridDay";
 
 const DashboardPage = () => {
+  usePreventPullToRefresh();
+
   const router = useRouter();
   const op = useRef<OverlayPanel>(null);
   const opNotas = useRef(null);
@@ -518,7 +521,7 @@ const DashboardPage = () => {
         headerToolbar={{
           left: "prev,today,next",
           center: "title",
-          right: "customConfig,customReload,customWeek,customDay", // Solo las vistas de semana y día
+          right: "customConfig,customReload,customWeek,customDay",
         }}
         buttonText={{
           today: "Hoy",
@@ -555,6 +558,7 @@ const DashboardPage = () => {
         allDaySlot={false} // Desactiva el slot de todo el día
         slotMinTime='05:00:00' // Hora mínima disponible (5:00 AM)
         slotMaxTime='22:00:00' // Hora máxima disponible (10:00 PM)
+        // slotDuration='00:05:00' // Intervalo de 1 hora entre los slots
         slotDuration='01:00:00' // Intervalo de 1 hora entre los slots
         slotLabelFormat={{
           hour: "numeric",
