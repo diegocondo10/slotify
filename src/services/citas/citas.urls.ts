@@ -8,6 +8,7 @@ export interface CitaUrls extends BaseURLs {
   cambiarEstado: (pk: PK) => string;
   reporteEstadisticas: (start: string, end: string) => string;
   reporteListStats: (start: string, end: string) => string;
+  reporteListStatsXlsx: (start: string, end: string) => string;
   payReport: (start: string, end: string) => string;
   payReportXlsx: (start: string, end: string) => string;
   printList: (search: string) => string;
@@ -25,6 +26,7 @@ export const CITAS_URLS: CitaUrls = {
   cambiarEstado: (pk: PK) => `citas/${pk}/cambiar-estado/`,
   reporteEstadisticas: (start: string, end: string) => `citas/reports/stats/${start}/${end}/`,
   reporteListStats: (start: string, end: string) => `citas/reports/list-stats/${start}/${end}/`,
+  reporteListStatsXlsx: (start: string, end: string) => `citas/reports/list-stats-xlsx/${start}/${end}/`,
   payReport: (start: string, end: string) => `citas/reports/pay-stats/${start}/${end}/`,
   payReportXlsx: (start: string, end: string) => `citas/reports/pay-stats-xlsx/${start}/${end}/`,
   printList: (search: string) => `citas/list-as-xlsx/${search}`,

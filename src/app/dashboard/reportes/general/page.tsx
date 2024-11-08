@@ -1,11 +1,14 @@
 "use client";
+import Button from "@/components/Buttons/Button";
 import PageTitle from "@/components/pages/PageTitle";
 import useRouteState from "@/hooks/useRouteState";
 import { CitaService } from "@/services/citas/citas.service";
 import { getTextColorForBackground } from "@/utils/color";
+import { downloadReport } from "@/utils/file";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { map } from "lodash";
+import { PrimeIcons } from "primereact/api";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -184,6 +187,14 @@ const ReporteGeneralPage = () => {
                     onChange={({ value }) => setSelectedEstado(value)}
                     showClear
                     placeholder='Seleccione un estado'
+                  />
+                }
+                end={
+                  <Button
+                    icon={PrimeIcons.PRINT}
+                    onClick={() => {
+                      downloadReport(new CitaService().reporteListStatsXlsx(startDate, endDate));
+                    }}
                   />
                 }
               />
