@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FaTasks } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
@@ -54,6 +54,7 @@ type RouteStateProps = {
   };
   view: string;
   hiddenDays?: number[];
+  threeDays?: boolean;
 };
 
 const WEEK_VIEW = "timeGridWeek";
@@ -82,6 +83,7 @@ const DashboardPage = () => {
         },
         view: WEEK_VIEW,
         hiddenDays: [],
+        threeDays: false,
       },
       onLoad: (state) => {
         const view = state?.view || WEEK_VIEW;
@@ -120,6 +122,7 @@ const DashboardPage = () => {
 
   const eventos: any[] = queryCitas?.data?.eventos || [];
   const summary: SummaryType = queryCitas.data?.summary || {};
+
   const hiddenDays = routeState?.hiddenDays || [];
 
   const handleEventClick = createClickHandler<EventClickArg>((info: EventClickArg) => {
@@ -237,93 +240,32 @@ const DashboardPage = () => {
 
   const [calcHeight, setCalcHeight] = useState(0);
 
-  useEffect(() => {
-    const calcularHeight = () => {
-      const viewportHeight = window.innerHeight;
+  const calcularHeight = () => {
+    const viewportHeight = window.innerHeight;
 
-      const navbarElement = document.querySelector("#navbar");
-      const summaryToolbarElement = document.querySelector("#summary_toolbar");
+    const navbarElement = document.querySelector("#navbar");
+    const summaryToolbarElement = document.querySelector("#summary_toolbar");
 
-      const navbarHeight = navbarElement?.clientHeight || 0;
-      const summaryToolbarHeight = summaryToolbarElement?.clientHeight || 0;
-      const extraHeight = isPwaInIOS() ? 20 : 10;
+    const navbarHeight = navbarElement?.clientHeight || 0;
+    const summaryToolbarHeight = summaryToolbarElement?.clientHeight || 0;
+    const extraHeight = isPwaInIOS() ? 20 : 10;
 
-      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeight));
-    };
-
-    calcularHeight();
-
-    window.removeEventListener("resize", calcularHeight);
-    window.addEventListener("resize", calcularHeight);
-    return () => {
-      window.removeEventListener("resize", calcularHeight);
-    };
-  }, [isWeekView]);
+    setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeight));
+  };
 
   useEffect(() => {
-    const calcularHeight = () => {
-      const viewportHeight = window.innerHeight;
-      const navbarHeight = document.querySelector("#navbar")?.clientHeight || 0;
-      const summaryToolbarHeight = document.querySelector("#summary_toolbar")?.clientHeight || 0;
-      const extraHeigh = isPwaInIOS() ? 20 : 10;
-      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeigh));
-    };
-
     calcularHeight();
-
-    window.addEventListener("resize", calcularHeight);
-    return () => {
-      window.removeEventListener("resize", calcularHeight);
-    };
   }, [isWeekView]);
 
   const onDoubleClickDayHeader = (date: string) => () => {
     opNotas.current.hide();
-
-    if (date && calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      const path = `?view=timeGridDay&date=${encodeURIComponent(date)}`;
-      router.push(window.location.pathname + path);
-      calendarApi.changeView("timeGridDay", date);
-    }
+    calendarApi.changeView(DAY_VIEW, date);
+    setRouteValue("view", DAY_VIEW);
   };
 
   const onOneClickDayHeader = (date: string) => async (event: any) => {
     opNotas.current.fetchNota(event, date);
   };
-
-  useEffect(() => {
-    const handleOnClickButton = (view: string) => () => {
-      const currentPath = window.location.pathname;
-      router.push(`${currentPath}?view=${view}`);
-    };
-
-    const weekButton = document.querySelector(".fc-timeGridWeek-button");
-    const dayButton = document.querySelector(".fc-timeGridDay-button");
-
-    const handleWeek = handleOnClickButton("timeGridWeek");
-    const handleDay = handleOnClickButton("timeGridDay");
-
-    if (weekButton) {
-      weekButton.addEventListener("click", handleWeek);
-    }
-    if (dayButton) {
-      dayButton.addEventListener("click", handleDay);
-    }
-    const reloadButton = document.querySelector(".fc-customReload-button");
-    if (reloadButton) {
-      const iconElement = document.createElement("i");
-      iconElement.classList.add("fa", "fa-solid", "fa-rotate");
-      reloadButton.innerHTML = "";
-      reloadButton.appendChild(iconElement);
-    }
-    return () => {
-      if (weekButton) {
-        weekButton.removeEventListener("click", handleWeek);
-        dayButton.removeEventListener("click", handleDay);
-      }
-    };
-  }, []);
 
   return (
     <div style={{ height: `${calcHeight}px`, width: "100vw" }}>
@@ -468,6 +410,7 @@ const DashboardPage = () => {
       <FullCalendar
         ref={calendarRef}
         nowIndicator
+        windowResize={calcularHeight}
         dayHeaderContent={(props) => {
           const formatedDate = toBackDate(props.date);
           return (
