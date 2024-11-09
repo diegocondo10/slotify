@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FaTasks } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
@@ -37,6 +37,7 @@ import CalendarLoader from "./components/CalendarLoader";
 import ModalConfig from "./components/ModalConfig";
 import OverlayPanelNotas from "./components/OverlayPanelNotas";
 import SummaryFooter from "./components/SummaryFooter";
+import { createRoot } from "react-dom/client";
 
 const citaService = new CitaService();
 const estadoService = new EstadoCitaService();
@@ -102,6 +103,7 @@ const DashboardPage = () => {
     {
       enabled: enableQuery,
       onSuccess: (citas) => {
+        simulateTouch();
         op.current.hide();
         opNotas.current.hide();
       },
@@ -120,7 +122,7 @@ const DashboardPage = () => {
 
   const eventos: any[] = queryCitas?.data?.eventos || [];
   const summary: SummaryType = queryCitas.data?.summary || {};
-  const hiddenDays = routeState?.hiddenDays || [];
+  const hiddenDays = useMemo(() => routeState?.hiddenDays || [], [routeState?.hiddenDays]);
 
   const handleEventClick = createClickHandler<EventClickArg>((info: EventClickArg) => {
     //@ts-ignore
@@ -260,23 +262,6 @@ const DashboardPage = () => {
     };
   }, [isWeekView]);
 
-  useEffect(() => {
-    const calcularHeight = () => {
-      const viewportHeight = window.innerHeight;
-      const navbarHeight = document.querySelector("#navbar")?.clientHeight || 0;
-      const summaryToolbarHeight = document.querySelector("#summary_toolbar")?.clientHeight || 0;
-      const extraHeigh = isPwaInIOS() ? 20 : 10;
-      setCalcHeight(viewportHeight - (navbarHeight + summaryToolbarHeight + extraHeigh));
-    };
-
-    calcularHeight();
-
-    window.addEventListener("resize", calcularHeight);
-    return () => {
-      window.removeEventListener("resize", calcularHeight);
-    };
-  }, [isWeekView]);
-
   const onDoubleClickDayHeader = (date: string) => () => {
     opNotas.current.hide();
 
@@ -293,36 +278,14 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    const handleOnClickButton = (view: string) => () => {
-      const currentPath = window.location.pathname;
-      router.push(`${currentPath}?view=${view}`);
-    };
+    // Accedemos al contenedor del calendario después de que se haya renderizado
+    if (calendarRef.current) {
+      const calendarEl = calendarRef.current?.elRef?.current; // `el` contiene el elemento DOM raíz de FullCalendar
+      const headerEl = calendarEl.querySelector(".fc-timegrid-axis");
+      console.log("CALENDAR: ", headerEl);
 
-    const weekButton = document.querySelector(".fc-timeGridWeek-button");
-    const dayButton = document.querySelector(".fc-timeGridDay-button");
-
-    const handleWeek = handleOnClickButton("timeGridWeek");
-    const handleDay = handleOnClickButton("timeGridDay");
-
-    if (weekButton) {
-      weekButton.addEventListener("click", handleWeek);
+      createRoot(headerEl).render(<div role='button' className="cursor-pointer">Lista de espera</div>);
     }
-    if (dayButton) {
-      dayButton.addEventListener("click", handleDay);
-    }
-    const reloadButton = document.querySelector(".fc-customReload-button");
-    if (reloadButton) {
-      const iconElement = document.createElement("i");
-      iconElement.classList.add("fa", "fa-solid", "fa-rotate");
-      reloadButton.innerHTML = "";
-      reloadButton.appendChild(iconElement);
-    }
-    return () => {
-      if (weekButton) {
-        weekButton.removeEventListener("click", handleWeek);
-        dayButton.removeEventListener("click", handleDay);
-      }
-    };
   }, []);
 
   return (
@@ -561,6 +524,7 @@ const DashboardPage = () => {
         slotMaxTime='22:00:00' // Hora máxima disponible (10:00 PM)
         // slotDuration='00:05:00' // Intervalo de 1 hora entre los slots
         slotDuration='01:00:00' // Intervalo de 1 hora entre los slots
+        snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
         slotLabelFormat={{
           hour: "numeric",
           minute: "2-digit",
@@ -578,10 +542,10 @@ const DashboardPage = () => {
         eventDurationEditable
         height='100%' // Hace que el calendario ocupe el 100% del contenedor
         expandRows={true} // Asegura que las filas se expandan para ocupar el espacio disponible
-        snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
         datesSet={handleDatesSet} // Manejador para capturar la fecha visible actual
         longPressDelay={300} // Reduce el tiempo necesario para empezar a arrastrar en dispositivos móviles
         dragScroll={false} // Permite que la vista se desplace mientras arrastras un evento
+        lazyFetching
       />
       {isWeekView && <SummaryFooter summary={summary} hiddenDays={hiddenDays} />}
     </div>

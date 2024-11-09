@@ -1,3 +1,4 @@
+"use client";
 import classNames from "classnames";
 import { useRouter } from "next/navigation";
 import { Button as PrimeButton, ButtonProps as PrimeButtonProps } from "primereact/button";
