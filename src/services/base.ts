@@ -130,6 +130,10 @@ export abstract class BaseService<T extends BaseURLs> {
     return await this.request("get", this.urls.retrieve(id), undefined, (status) => status === 200);
   }
 
+  async list(): Promise<AxiosResponse> {
+    return await this.request("get", this.urls.list, undefined, (status) => status === 200);
+  }
+
   protected handleError(error: any): never {
     if (isAxiosError(error) && error.response) {
       const { data } = error.response;

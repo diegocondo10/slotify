@@ -159,7 +159,7 @@ const CitaPage = ({ searchParams }) => {
           </div>
           <div className='col-11 md:col-10 lg:col-8'>
             <Card
-              className='p-5'
+              className='p-4'
               footer={
                 <div className='w-full flex flex-row justify-content-around'>
                   <Button
