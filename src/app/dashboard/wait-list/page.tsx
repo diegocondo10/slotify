@@ -101,7 +101,7 @@ const WaitListPage = () => {
         }}
       />
 
-      <div className='col-12'>
+      <div className='col-12 mb-5'>
         <DataTable
           loading={queryList.isFetching || isLoading}
           value={queryList?.data?.data || []}
