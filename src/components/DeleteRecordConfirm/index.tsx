@@ -47,7 +47,7 @@ const DeleteRecordConfirm = forwardRef<
     deleteRecord,
   }));
 
-  return <ConfirmDialog className='delete__confirm__dialog' />;
+  return <ConfirmDialog className='delete__confirm__dialog' dismissableMask />;
 });
 
 DeleteRecordConfirm.displayName = "DeleteRecordConfirm";

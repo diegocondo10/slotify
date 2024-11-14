@@ -12,4 +12,7 @@ export class WaitListService extends BaseService<WaitListUrls> {
   async archivar(pk: PK, archived?: boolean) {
     return (await this.privateApi.put(this.urls.archivar(pk), { archived })).data;
   }
+  async createOrUpdate(body: Record<string, any>) {
+    return (await this.privateApi.post(this.urls.createOrUpdate, body)).data;
+  }
 }
