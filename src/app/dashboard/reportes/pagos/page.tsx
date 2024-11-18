@@ -178,40 +178,42 @@ const PayReportPage = () => {
 
             <Column header='Nombre' field='label' />
             <Column header='Citas' field='count' className='text-center' />
-            {queryReport?.data?.statusStats.map((status) => (
-              <Column
-                key={status.id}
-                header={
-                  <div className='flex flex-row justify-content-around'>
-                    <span>{status.label}</span>
-                    <Tag
-                      className='my-auto mx-1'
-                      rounded
-                      style={{
-                        color: status.color,
-                        backgroundColor: status.backgroundColor,
-                      }}>
-                      {status.count}
-                    </Tag>
-                  </div>
-                }
-                className='text-center'
-                body={(rowData) => {
-                  return (
-                    <div className='text-lg flex flex-row align-content-center justify-content-around'>
-                      <div className='flex'>
-                        <MdOutlinePaid className='text-green-600 mx-2 text-xl' />
-                        <span>{rowData.status[status.slug]?.paid || 0}</span>
-                      </div>
-                      <div className='flex'>
-                        <MdOutlinePaid className='text-red-600 mx-2 text-xl' />
-                        {rowData.status[status.slug]?.unPaid || 0}
-                      </div>
+            {queryReport?.data?.statusStats
+              ?.filter((status) => status.count > 0)
+              ?.map((status) => (
+                <Column
+                  key={status.id}
+                  header={
+                    <div className='flex flex-row justify-content-around'>
+                      <span>{status.label}</span>
+                      <Tag
+                        className='my-auto mx-1'
+                        rounded
+                        style={{
+                          color: status.color,
+                          backgroundColor: status.backgroundColor,
+                        }}>
+                        {status.count}
+                      </Tag>
                     </div>
-                  );
-                }}
-              />
-            ))}
+                  }
+                  className='text-center'
+                  body={(rowData) => {
+                    return (
+                      <div className='text-lg flex flex-row align-content-center justify-content-around'>
+                        <div className='flex'>
+                          <MdOutlinePaid className='text-green-600 mx-2 text-xl' />
+                          <span>{rowData.status[status.slug]?.paid || 0}</span>
+                        </div>
+                        <div className='flex'>
+                          <MdOutlinePaid className='text-red-600 mx-2 text-xl' />
+                          {rowData.status[status.slug]?.unPaid || 0}
+                        </div>
+                      </div>
+                    );
+                  }}
+                />
+              ))}
           </DataTable>
         </div>
       )}
