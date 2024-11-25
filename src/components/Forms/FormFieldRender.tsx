@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import ErrorMessage from "./ErrorMessage";
 
 export interface FormFieldRenderProps {
@@ -8,7 +8,7 @@ export interface FormFieldRenderProps {
     React.LabelHTMLAttributes<HTMLLabelElement>,
     HTMLLabelElement
   >;
-  render: ({ name }: { name: string }) => React.ReactElement;
+  render: ({ name }: { name: string }) => React.ReactElement | React.ReactNode;
 }
 
 const FormFieldRender: FC<FormFieldRenderProps> = ({ name, render, label }) => {
