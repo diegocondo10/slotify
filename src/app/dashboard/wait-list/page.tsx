@@ -11,22 +11,51 @@ import TextInput from "@/components/Forms/TextInput";
 import PageTitle from "@/components/pages/PageTitle";
 import useDeleteItem from "@/hooks/useDeleteItem";
 import { WaitListService } from "@/services/wait-list/wait-list.service";
-
 import { createClickHandler } from "@/utils/events";
+import { keyBy } from "lodash";
+import { normalizeText } from "normalize-text";
 import { PrimeIcons } from "primereact/api";
 import { Checkbox } from "primereact/checkbox";
 import { Column } from "primereact/column";
 import { DataTable, DataTableRowClickEvent } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Toolbar } from "primereact/toolbar";
-import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { InputText } from "primereact/inputtext";
+import { Tag } from "primereact/tag";
+import { useMemo, useState } from "react";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useQuery } from "react-query";
 
 const waitListService = new WaitListService();
 
+const PRIORIDADES = [
+  {
+    label: 1,
+    style: {
+      backgroundColor: "#d11223",
+      color: "#ffffff",
+    },
+  },
+  {
+    label: 2,
+    style: {
+      backgroundColor: "#f3e60a",
+      color: "#000000",
+    },
+  },
+  {
+    label: 3,
+    style: {
+      backgroundColor: "#34f30a",
+      color: "#000000",
+    },
+  },
+];
+
+const PRIORIDADES_INDEX = keyBy(PRIORIDADES, "label");
+
 const WaitListPage = () => {
+  console.log(PRIORIDADES_INDEX);
   const methods = useForm({
     mode: "onChange",
   });
@@ -34,6 +63,8 @@ const WaitListPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [isVisible, setIsVisible] = useState(false);
+
+  const [filter, setFilter] = useState("");
 
   const queryList = useQuery(["wait-list"], () => waitListService.list(), {});
 
@@ -73,9 +104,19 @@ const WaitListPage = () => {
   };
 
   const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
+
   const deleteMutation = useDeleteItem({
     mutationFn: (record) => waitListService.archivar(record.id),
   });
+
+  const data = useMemo(() => {
+    const normalizedFilter = normalizeText(filter);
+    return (queryList?.data?.data || []).filter(
+      (item) =>
+        normalizeText(item.titulo).includes(normalizedFilter) ||
+        normalizeText(item.descripcion).includes(normalizedFilter)
+    );
+  }, [filter, queryList?.data?.data]);
 
   return (
     <div className='grid grid-nogutter'>
@@ -104,17 +145,38 @@ const WaitListPage = () => {
       <div className='col-12 mb-5'>
         <DataTable
           loading={queryList.isFetching || isLoading}
-          value={queryList?.data?.data || []}
+          value={data}
           size='small'
           rowHover
           stripedRows
           showGridlines
           onRowClick={handleRowClick}
           header={
-            <Toolbar
-              start={<Button label='Agregar' onClick={handleOnAdd} />}
-              end={<Button icon={PrimeIcons.REFRESH} onClick={() => queryList.refetch()} />}
-            />
+            <div className='flex flex-row justify-between items-center gap-5 my-2'>
+              <div className='flex items-center'>
+                <Button
+                  label='Agregar'
+                  onClick={handleOnAdd}
+                  disabled={queryList.isFetching || isLoading}
+                />
+              </div>
+              <div className='flex-1 px-2'>
+                <InputText
+                  className='w-full'
+                  onChange={(e) => setFilter(e.target.value)}
+                  value={filter}
+                  type='search'
+                  disabled={queryList.isFetching || isLoading}
+                />
+              </div>
+              <div className='flex items-center'>
+                <Button
+                  icon={PrimeIcons.REFRESH}
+                  onClick={() => queryList.refetch()}
+                  disabled={queryList.isFetching || isLoading}
+                />
+              </div>
+            </div>
           }>
           <Column
             header='#'
@@ -127,11 +189,32 @@ const WaitListPage = () => {
             field='isChecked'
             className='text-center'
             body={(rowData) => {
-              return <Checkbox checked={rowData?.isChecked} onChange={handleCheck(rowData)} />;
+              return (
+                <Checkbox
+                  checked={rowData?.isChecked}
+                  onChange={handleCheck(rowData)}
+                  disabled={queryList.isFetching || isLoading}
+                />
+              );
             }}
           />
 
-          <Column header='Título' field='titulo' />
+          <Column
+            header='Prioridad'
+            className='text-center'
+            bodyClassName='m-0'
+            body={(rowData) => (
+              <div
+                className='mx-auto py-2 font-bold'
+                style={{
+                  ...PRIORIDADES_INDEX[rowData.prioridad].style,
+                  width: "3rem",
+                }}>
+                {rowData.prioridad}
+              </div>
+            )}
+          />
+          <Column header='Nombre' field='titulo' />
 
           <Column header='Descripción' field='descripcion' />
 
@@ -207,6 +290,43 @@ const WaitListPage = () => {
                         },
                       },
                     }}
+                  />
+                )}
+              />
+            </div>
+
+            <div className='field col-12'>
+              <Controller
+                name='prioridad'
+                defaultValue='1'
+                render={({ field: { value, onChange } }) => (
+                  <FormFieldRender
+                    name='prioridad'
+                    label={
+                      <div className='flex flex-row my-1'>
+                        <div className=' py-1'>Prioridad: </div>
+                        {value && (
+                          <Tag
+                            className='ml-2 px-2 text-center border-1 border-gray-500'
+                            style={PRIORIDADES_INDEX[value].style}>
+                            {PRIORIDADES_INDEX[value].label}
+                          </Tag>
+                        )}
+                      </div>
+                    }
+                    render={() => (
+                      <div className='w-full'>
+                        {PRIORIDADES.map((prioridad) => (
+                          <button
+                            type='button'
+                            className='text-center border-1 border-gray-500 border-round text-center mx-1 font-bold cursor-pointer'
+                            style={{ ...prioridad.style, width: "3rem", height: "3rem" }}
+                            onClick={() => onChange(prioridad.label)}>
+                            {prioridad.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   />
                 )}
               />
