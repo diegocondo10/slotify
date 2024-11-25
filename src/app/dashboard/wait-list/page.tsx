@@ -318,6 +318,7 @@ const WaitListPage = () => {
                       <div className='w-full'>
                         {PRIORIDADES.map((prioridad) => (
                           <button
+                            key={prioridad.label}
                             type='button'
                             className='text-center border-1 border-gray-500 border-round text-center mx-1 font-bold cursor-pointer'
                             style={{ ...prioridad.style, width: "3rem", height: "3rem" }}
