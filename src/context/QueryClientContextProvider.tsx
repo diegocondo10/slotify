@@ -16,7 +16,7 @@ const QueryClientContextProvider: React.FC<PropsWithChildren> = ({ children }) =
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <Toaster position='top-center' reverseOrder={false} />
+      <Toaster position='bottom-right' reverseOrder={false} toastOptions={{ duration: 5000 }} />
     </QueryClientProvider>
   );
 };

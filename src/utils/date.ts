@@ -1,7 +1,38 @@
-import { format, setHours, setMinutes } from "date-fns";
+import { addDays, format, getDay, setHours, setMinutes } from "date-fns";
 import moment from "moment";
 export const DATE_FORMAT = "yyyy-MM-DD";
 export const DATE_TIME_FORMAT = "yyyy-MM-DD HH:mm";
+
+export const DIAS = [
+  {
+    label: "Lunes",
+    value: 1,
+  },
+  {
+    label: "Martes",
+    value: 2,
+  },
+  {
+    label: "Miercoles",
+    value: 3,
+  },
+  {
+    label: "Jueves",
+    value: 4,
+  },
+  {
+    label: "Viernes",
+    value: 5,
+  },
+  {
+    label: "Sabado",
+    value: 6,
+  },
+  {
+    label: "Domingo",
+    value: 0,
+  },
+];
 
 export const formatearFechaBackend = (date: any = moment().toDate()) =>
   moment(date).format(DATE_FORMAT);
@@ -74,4 +105,19 @@ export const isAm = (): boolean => {
 
 export const isDateAm = (date: Date) => {
   return date.getHours() < 12;
+};
+
+export const calcularTresDias = () => {
+  const today = new Date();
+  const todayDayNumber = getDay(today);
+
+  const tomorrow = addDays(today, 1);
+  const dayAfterTomorrow = addDays(today, 2);
+
+  const tomorrowDayNumber = getDay(tomorrow);
+  const dayAfterTomorrowDayNumber = getDay(dayAfterTomorrow);
+
+  const daysToShow = [todayDayNumber, tomorrowDayNumber, dayAfterTomorrowDayNumber];
+
+  return DIAS.filter((dia) => !daysToShow.includes(dia.value)).map((dia) => dia.value);
 };

@@ -11,7 +11,7 @@ import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { NotaService } from "@/services/notas/notas.service";
 import { PK } from "@/types/api";
-import { formatToTimeString, toBackDate } from "@/utils/date";
+import { calcularTresDias, formatToTimeString, toBackDate } from "@/utils/date";
 import { isPwaInIOS } from "@/utils/device";
 import { addIconInButton } from "@/utils/dom";
 import { createClickHandler, simulateTouch } from "@/utils/events";
@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaTasks } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
@@ -465,7 +465,8 @@ const DashboardPage = () => {
         headerToolbar={{
           left: "prev,today,next",
           center: "title",
-          right: "customConfig,customReload,customWeek,customDay",
+          // right: "customConfig,customReload,customWeek,customDay,customThreeDays",
+          right: "customReload,customWeek,customDay,customThreeDays",
         }}
         buttonText={{
           today: "Hoy",
@@ -473,11 +474,11 @@ const DashboardPage = () => {
           day: "Día",
         }}
         customButtons={{
-          customConfig: {
-            click: () => {
-              setShowConfigModal(true);
-            },
-          },
+          // customConfig: {
+          //   click: () => {
+          //     setShowConfigModal(true);
+          //   },
+          // },
           customReload: {
             click: () => {
               queryCitas.refetch();
@@ -485,17 +486,28 @@ const DashboardPage = () => {
             },
           },
           customWeek: {
-            text: "Semana",
+            text: "S",
             click: (evt) => {
               calendarApi.changeView(WEEK_VIEW);
               setRouteValue("view", WEEK_VIEW);
             },
           },
           customDay: {
-            text: "Día",
+            text: "D",
             click: () => {
               calendarApi.changeView(DAY_VIEW);
               setRouteValue("view", DAY_VIEW);
+            },
+          },
+          customThreeDays: {
+            text: "3D",
+            click: () => {
+              const isChecked = !routeState.threeDays;
+              setRouteState({
+                ...routeState,
+                threeDays: isChecked,
+                hiddenDays: isChecked === true ? calcularTresDias() : [],
+              });
             },
           },
         }}

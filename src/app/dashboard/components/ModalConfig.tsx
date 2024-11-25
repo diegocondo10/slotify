@@ -5,7 +5,7 @@ import { Dialog } from "primereact/dialog";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
 import { ToggleButton } from "primereact/togglebutton";
 
-const dias = [
+export const dias = [
   {
     label: "Lunes",
     value: 1,
@@ -50,20 +50,7 @@ const ModalConfig = ({ show, setShow }) => {
     }
   };
 
-  const calcularDias = () => {
-    const today = new Date();
-    const todayDayNumber = getDay(today);
 
-    const tomorrow = addDays(today, 1);
-    const dayAfterTomorrow = addDays(today, 2);
-
-    const tomorrowDayNumber = getDay(tomorrow);
-    const dayAfterTomorrowDayNumber = getDay(dayAfterTomorrow);
-
-    const daysToShow = [todayDayNumber, tomorrowDayNumber, dayAfterTomorrowDayNumber];
-
-    return dias.filter((dia) => !daysToShow.includes(dia.value)).map((dia) => dia.value);
-  };
 
   return (
     <Dialog
