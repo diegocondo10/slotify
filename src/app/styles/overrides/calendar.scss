@@ -152,3 +152,18 @@
   width: 100% !important;
   height: 100% !important;
 }
+
+button.fc-button.fc-button-primary {
+  &.fc-customReload-button {
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
+  }
+  &.fc-customWeek-button,
+  &.fc-customDay-button,
+  &.fc-customThreeDays-button {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  padding-top: 0.3rem !important;
+  padding-bottom: 0.3rem !important;
+}
