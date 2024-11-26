@@ -126,7 +126,7 @@ const AppointmentsReportPage = () => {
                   }}
                   startDate={startDate}
                   endDate={endDate}
-                  monthsShown={2}
+                  // monthsShown={2}
                 />
               );
             }}
