@@ -2,6 +2,7 @@ import API from "@/services/api";
 import { simulateTouch } from "@/utils/events";
 import { AxiosError, AxiosResponse } from "axios";
 import debounce from "lodash/debounce";
+import { getSession } from "next-auth/react";
 import {
   DataTableBaseProps,
   DataTableFilterMeta,
@@ -75,6 +76,9 @@ const usePagination = <TData extends ResponseApi<any>>({
   const [multiSortMeta, setMultiSortMeta] = useState([]);
 
   const [queryFilters, setQueryFilters] = useState<DataTableFilterMeta>(defaultFilters);
+
+  const [token, setToken] = useState<string>(null);
+
   const [searchUrl, setSearchUrl] = useState("");
   const debouncedFilter = useCallback(
     debounce((newFilters) => {
@@ -92,7 +96,21 @@ const usePagination = <TData extends ResponseApi<any>>({
     async ({ signal }) => {
       const search = buildSearch({ page, filters: queryFilters, ordering: multiSortMeta });
       setSearchUrl(search);
-      return API.get<TData>(uri + search, { signal });
+      let internalToken = token;
+      if (!internalToken) {
+        const session = await getSession();
+        if (session) {
+          setToken(session.accessToken);
+        }
+        internalToken = session.accessToken;
+      }
+
+      return API.get<TData>(uri + search, {
+        signal,
+        headers: {
+          Authorization: `Bearer ${internalToken}`,
+        },
+      });
     },
     {
       keepPreviousData: true,

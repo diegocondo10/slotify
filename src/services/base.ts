@@ -72,6 +72,7 @@ export abstract class BaseService<T extends BaseURLs> {
     usePublicApi: boolean = false
   ): Promise<AxiosResponse<R>> {
     const apiInstance = usePublicApi ? this._publicApi : this._privateApi;
+
     try {
       const response = await apiInstance.request<R>({
         method,
@@ -131,7 +132,7 @@ export abstract class BaseService<T extends BaseURLs> {
   }
 
   async list(): Promise<AxiosResponse> {
-    return await this.request("get", this.urls.list, undefined, (status) => status === 200);
+    return await this.request("get", this.urls.list, undefined, (status) => status === 200, false);
   }
 
   protected handleError(error: any): never {
