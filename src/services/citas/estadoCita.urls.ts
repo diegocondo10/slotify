@@ -5,5 +5,5 @@ export interface EstadoCitaUrls extends BaseURLs {
 }
 
 export const ESTADO_CITA_URLS: EstadoCitaUrls = {
-  listAsLabelValue: "citas/estados/label-value/?version=3",
+  listAsLabelValue: "citas/estados/label-value/?version=4",
 };
