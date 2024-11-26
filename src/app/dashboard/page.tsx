@@ -48,11 +48,11 @@ type SummaryType = Record<
 >;
 
 type RouteStateProps = {
-  currentRange: {
+  currentRange?: {
     start: Date;
     end: Date;
   };
-  view: string;
+  view?: string;
   hiddenDays?: number[];
   threeDays?: boolean;
 };
@@ -489,22 +489,32 @@ const DashboardPage = () => {
             text: "S",
             click: (evt) => {
               calendarApi.changeView(WEEK_VIEW);
-              setRouteValue("view", WEEK_VIEW);
+              setRouteState({
+                threeDays: false,
+                view: WEEK_VIEW,
+                hiddenDays: [],
+              });
             },
           },
           customDay: {
             text: "D",
             click: () => {
               calendarApi.changeView(DAY_VIEW);
-              setRouteValue("view", DAY_VIEW);
+              setRouteState({
+                threeDays: false,
+                view: DAY_VIEW,
+                hiddenDays: [],
+              });
             },
           },
           customThreeDays: {
             text: "3D",
             click: () => {
+              calendarApi.changeView(WEEK_VIEW);
               const isChecked = !routeState.threeDays;
               setRouteState({
                 ...routeState,
+                view: WEEK_VIEW,
                 threeDays: isChecked,
                 hiddenDays: isChecked === true ? calcularTresDias() : [],
               });
