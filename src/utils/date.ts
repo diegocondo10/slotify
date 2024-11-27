@@ -109,15 +109,12 @@ export const isDateAm = (date: Date) => {
 
 export const calcularTresDias = () => {
   const today = new Date();
-  const todayDayNumber = getDay(today);
+  const diasMostrados = new Set(
+    Array.from({ length: 3 }, (_, index) => getDay(addDays(today, index)))
+  );
+  const todosLosDias = [0, 1, 2, 3, 4, 5, 6];
 
-  const tomorrow = addDays(today, 1);
-  const dayAfterTomorrow = addDays(today, 2);
+  const diasExcluidos = todosLosDias.filter((dia) => !diasMostrados.has(dia));
 
-  const tomorrowDayNumber = getDay(tomorrow);
-  const dayAfterTomorrowDayNumber = getDay(dayAfterTomorrow);
-
-  const daysToShow = [todayDayNumber, tomorrowDayNumber, dayAfterTomorrowDayNumber];
-
-  return DIAS.filter((dia) => !daysToShow.includes(dia.value)).map((dia) => dia.value);
+  return diasExcluidos;
 };
