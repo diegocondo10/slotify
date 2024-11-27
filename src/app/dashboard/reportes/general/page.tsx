@@ -222,9 +222,7 @@ const ReporteGeneralPage = () => {
               header='Fecha'
               field='fecha'
               className='text-center w-10rem'
-              body={(rowData) => (
-                <p className='m-0 p-0 w-10rem mx-auto'>{format(rowData.fecha, "dd/MMM/yyy")}</p>
-              )}
+              body={(rowData) => <p className='m-0 p-0 w-10rem mx-auto'>{rowData.fecha}</p>}
             />
             {/* <Column header='Duración' field='duracion' className='text-center' /> */}
             <Column
