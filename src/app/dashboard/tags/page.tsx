@@ -14,6 +14,7 @@ import { PrimeIcons } from "primereact/api";
 import { Column } from "primereact/column";
 import { DataTableRowEditCompleteEvent } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
+import { Tag } from "primereact/tag";
 import toast from "react-hot-toast";
 import { useMutation } from "react-query";
 
@@ -102,6 +103,22 @@ export default function ClientesPage() {
                 onChange={(e) => filterProps.filterApplyCallback(e.target.value)}
               />
             )}
+          />
+          <Column
+            className='text-center w-1'
+            header='Último Estado'
+            body={(rowData) =>
+              rowData?.ultimoEstado && (
+                <Tag
+                  className='text-center border-1 border-gray-500 py-2'
+                  style={{
+                    color: rowData.ultimoEstado?.color,
+                    backgroundColor: rowData?.ultimoEstado?.backgroundColor,
+                  }}>
+                  {rowData?.ultimoEstado?.nombre}
+                </Tag>
+              )
+            }
           />
           <Column className='text-center w-1' header='Editar' rowEditor />
           <Column
