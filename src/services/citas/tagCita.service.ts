@@ -8,4 +8,7 @@ export class TagCitaService extends BaseService<TagCitaUrls> {
   async listAsLabelValue(): Promise<any[]> {
     return (await this.privateApi.get(this.urls.listAsLabelValue)).data;
   }
+  async listAsLabelValueAll(): Promise<any[]> {
+    return (await this.privateApi.get(this.urls.listAsLabelValueAll)).data;
+  }
 }

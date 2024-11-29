@@ -48,7 +48,7 @@ const AppointmentsReportPage = () => {
     },
   });
 
-  const queryTags = useQuery(["tags_list_label_value"], () => tagService.listAsLabelValue());
+  const queryTags = useQuery(["tags_list_label_value"], () => tagService.listAsLabelValueAll());
   const queryEstados = useQuery(["estados_citas"], () => estadoService.listAsLabelValue(), {});
   return (
     <div className='grid grid-nogutter justify-content-center'>
