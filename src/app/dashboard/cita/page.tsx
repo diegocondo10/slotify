@@ -123,7 +123,10 @@ const CitaPage = ({ searchParams }) => {
       formData.fecha = toBackDate(formData.fecha);
       formData.horaInicio = formatToTimeString(formData.horaInicio);
       formData.horaFin = formatToTimeString(formData.horaFin);
-      formData.tag = formData.tag.value;
+      const tagDefaultId = estadosIndexed?.[formData.estado]?.value?.tagDefaultId;
+      formData.tag = formData?.tag?.value || tagDefaultId;
+      console.log("FORM DATA: ", formData);
+
       await mutation.submitForm(formData);
       router.push(extractGoBackTo());
     } catch (error) {
@@ -187,7 +190,17 @@ const CitaPage = ({ searchParams }) => {
                       <Controller
                         name={name}
                         rules={{
-                          required: REQUIRED_MSG,
+                          validate: (value) => {
+                            const estado = methods.watch("estado");
+                            if (!value && !estado) {
+                              return "Debes seleccionar un Título o un Estado";
+                            }
+                            const estadoObj = estadosIndexed?.[estado];
+                            if (!estadoObj?.value?.tagDefaultId) {
+                              return "Este campo es obligatorio";
+                            }
+                            return true;
+                          },
                         }}
                         render={({ field, fieldState }) => (
                           <CreatableSelect
@@ -238,6 +251,9 @@ const CitaPage = ({ searchParams }) => {
                         name={name}
                         rules={{
                           required: REQUIRED_MSG,
+                          onChange: () => {
+                            methods.trigger("tag");
+                          },
                         }}
                         render={({ field }) => (
                           <div className='flex flex-row w-full'>
