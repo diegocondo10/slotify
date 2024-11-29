@@ -196,9 +196,12 @@ const CitaPage = ({ searchParams }) => {
                               return "Debes seleccionar un Título o un Estado";
                             }
                             const estadoObj = estadosIndexed?.[estado];
-                            if (!estadoObj?.value?.tagDefaultId) {
+                            if (!estadoObj?.value?.tagDefaultId && !value) {
                               return "Este campo es obligatorio";
                             }
+
+                            console.log("PRUEBA: ", value);
+
                             return true;
                           },
                         }}
@@ -216,6 +219,9 @@ const CitaPage = ({ searchParams }) => {
                                 {inputValue}
                               </p>
                             )}
+                            isClearable
+                            inputId='tag'
+                            placeholder='Seleccionar...'
                             value={field.value}
                             onChange={(evt) => {
                               field.onChange(evt);
