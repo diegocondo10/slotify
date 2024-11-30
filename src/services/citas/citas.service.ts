@@ -55,4 +55,9 @@ export class CitaService extends BaseService<CitaUrls> {
   async cambiarEstado(pk: PK, idEstado: PK): Promise<any> {
     return (await this.privateApi.put(this.urls.cambiarEstado(pk), { idEstado })).data;
   }
+
+  async detail(id: PK): Promise<any> {
+    return (await this.request("get", this.urls.detail(id), undefined, (status) => status === 200))
+      .data;
+  }
 }

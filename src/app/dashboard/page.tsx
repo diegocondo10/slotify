@@ -1,23 +1,19 @@
 "use client";
 
+import DetailPopUp, { DetailPopUpHandle } from "@/components/Appointmets/DetailPopUp";
 import Button from "@/components/Buttons/Button";
-import DeleteRecordConfirm from "@/components/DeleteRecordConfirm";
-import RecordDetail from "@/components/DeleteRecordConfirm/RecordDetail";
-import useDeleteRecordConfirm from "@/components/DeleteRecordConfirm/useDeleteRecordConfirm";
 import { CrudActions } from "@/emuns/crudActions";
 import useRouteState from "@/hooks/useRouteState";
 import useToasts from "@/hooks/useToasts";
 import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { NotaService } from "@/services/notas/notas.service";
-import { PK } from "@/types/api";
 import { calcularTresDias, formatToTimeString, toBackDate } from "@/utils/date";
 import { isPwaInIOS } from "@/utils/device";
 import { addIconInButton } from "@/utils/dom";
 import { createClickHandler, simulateTouch } from "@/utils/events";
 import { getCurrentPathEncoded } from "@/utils/router";
 import { DatePointApi, DatesSetArg, EventClickArg } from "@fullcalendar/core/index.js";
-import { EventImpl } from "@fullcalendar/core/internal";
 import interactionPlugin from "@fullcalendar/interaction"; // para drag and drop
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
@@ -27,8 +23,6 @@ import { isEqual } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
-import { OverlayPanel } from "primereact/overlaypanel";
-import { Tag } from "primereact/tag";
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { FaTasks } from "react-icons/fa";
@@ -65,12 +59,13 @@ const DAY_VIEW = "timeGridDay";
 
 const DashboardPage = () => {
   const router = useRouter();
-  const op = useRef<OverlayPanel>(null);
+
+  const detailPopUpRef = useRef<DetailPopUpHandle>(null);
   const opNotas = useRef(null);
 
   const calendarRef = useRef<FullCalendar>(null);
   const getCalendarApi = () => calendarRef.current?.getApi();
-  const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
+  // const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
 
   const toast = useToasts();
@@ -107,7 +102,7 @@ const DashboardPage = () => {
       enabled: enableQuery,
       onSuccess: (citas) => {
         simulateTouch();
-        op.current.hide();
+        detailPopUpRef.current?.hide?.();
         opNotas.current.hide();
       },
     }
@@ -121,8 +116,6 @@ const DashboardPage = () => {
     }
   );
 
-  const queryEstados = useQuery(["estados_citas"], () => estadoService.listAsLabelValue());
-
   const eventos: any[] = queryCitas?.data?.eventos || [];
   const summary: SummaryType = queryCitas.data?.summary || {};
 
@@ -130,8 +123,7 @@ const DashboardPage = () => {
 
   const handleEventClick = createClickHandler<EventClickArg>((info: EventClickArg) => {
     //@ts-ignore
-    op.current.toggle(info.jsEvent, info.el);
-    setSelectedEvent(info.event);
+    detailPopUpRef.current.toggle(info.event.id, info.jsEvent, info.el);
   });
 
   const handleEventDrop = async (info: EventClickArg): Promise<void> => {
@@ -222,20 +214,6 @@ const DashboardPage = () => {
 
   const isWeekView = getCalendarApi()?.view?.type === WEEK_VIEW;
 
-  const handlePagar = async () => {
-    op.current.hide();
-    await citaService.pagar(selectedEvent.id);
-    queryCitas.refetch();
-  };
-
-  const handleCambiarEstado = (pk: PK, idEstado: PK) => async () => {
-    op.current.hide();
-    await citaService.cambiarEstado(pk, idEstado);
-    queryCitas.refetch();
-  };
-
-  const { deleteRecordRef, deleteEvent } = useDeleteRecordConfirm();
-
   useEffect(() => {
     addIconInButton(".fc-customReload-button", "fa fa-solid fa-rotate");
     addIconInButton(".fc-customConfig-button", "fa fa-solid fa-gear");
@@ -286,141 +264,16 @@ const DashboardPage = () => {
     }
   }, []);
 
+  const refetch = () => {
+    queryCitas.refetch();
+    queryNotas.refetch();
+  };
+
   return (
     <div style={{ height: `${calcHeight}px`, width: "100vw" }}>
       {queryCitas.isFetching && <CalendarLoader />}
 
-      <DeleteRecordConfirm
-        ref={deleteRecordRef}
-        messageDetail={(record: EventImpl) => (
-          <RecordDetail
-            title='¿Estas seguro de eliminar esta cita?'
-            items={[
-              ["Paciente", record.title],
-              [
-                "Estado",
-                <Tag
-                  key={record.id}
-                  style={{
-                    backgroundColor: record.backgroundColor,
-                    color: record.textColor,
-                  }}>
-                  {record.extendedProps.estadoLabel}
-                </Tag>,
-              ],
-              ["Fecha", format(record.start, "dd/MM/yyy")],
-              [
-                "Hora",
-                <div key={record.id}>
-                  {format(record.start, "hh:mm a")} {" - "}
-                  {format(record.end, "hh:mm a")}
-                </div>,
-              ],
-              ["Notas", record.extendedProps?.notas],
-              ["Tareas", record.extendedProps?.tareas],
-            ]}
-          />
-        )}
-        onAccept={async (record: EventImpl) => {
-          await citaService.delete(record.id);
-          await queryCitas.refetch();
-          queryNotas.refetch();
-          toast.addSuccessToast("Se ha eliminado la cita correctamente");
-        }}
-      />
-
-      <OverlayPanel style={{ minWidth: "25rem", maxWidth: "30rem" }} ref={op} dismissable>
-        {selectedEvent && (
-          <div className='flex flex-column'>
-            <div className='flex flex-row align-items-center'>
-              <h4 className='m-0'>{selectedEvent.title}</h4>
-              <div className='flex flex-row w-8rem justify-content-around'>
-                <Button
-                  className='mx-1'
-                  sm
-                  variant='info'
-                  icon={PrimeIcons.PENCIL}
-                  rounded
-                  onClick={() => {
-                    const goBackTo = getCurrentPathEncoded();
-                    router.push(
-                      `/dashboard/cita?action=${CrudActions.UPDATE}&id=${selectedEvent.id}&goBackTo=${goBackTo}`
-                    );
-                  }}
-                />
-                <Button
-                  className='mx-1'
-                  sm
-                  variant='success'
-                  icon={PrimeIcons.DOLLAR}
-                  rounded
-                  onClick={handlePagar}
-                  outlined={selectedEvent?.extendedProps?.isPagada === false}
-                />
-                <Button
-                  className='mx-1'
-                  sm
-                  variant='danger'
-                  icon={PrimeIcons.TRASH}
-                  rounded
-                  disabled={selectedEvent.extendedProps.isPagada}
-                  onClick={deleteEvent(selectedEvent)}
-                />
-              </div>
-            </div>
-            <div>
-              <Tag
-                style={{
-                  backgroundColor: selectedEvent.backgroundColor,
-                  color: selectedEvent.textColor,
-                }}>
-                {selectedEvent.extendedProps.estadoLabel}
-              </Tag>
-            </div>
-            {selectedEvent.extendedProps.isPagada && (
-              <div>
-                <Tag>Pagada</Tag>
-              </div>
-            )}
-
-            <div className='flex flex-row my-2 mx-auto'>
-              {queryEstados.data?.map((estado) => (
-                <div
-                  role='button'
-                  key={estado.value.codigo}
-                  className='border-1 border-gray-500 border-round text-center flex flex-column justify-content-center mx-1 font-bold cursor-pointer'
-                  style={{
-                    width: "2.5rem",
-                    height: "2.5rem",
-                    backgroundColor: estado.value.color,
-                    color: estado.value.colorLetra,
-                  }}
-                  onClick={handleCambiarEstado(selectedEvent.id, estado.value.id)}>
-                  {estado.value.codigo}
-                </div>
-              ))}
-            </div>
-
-            <p className='my-1'>
-              <strong>Fecha:</strong> {format(selectedEvent.start, "dd/MM/yyy")}
-            </p>
-            <p className='my-1'>
-              <strong>Hora:</strong> {format(selectedEvent.start, "hh:mm a")} {" - "}
-              {selectedEvent?.end && format(selectedEvent?.end, "hh:mm a")}
-            </p>
-            {selectedEvent.extendedProps.hasNotas && (
-              <p className='my-1'>
-                <strong>Notas:</strong> {selectedEvent.extendedProps?.notas}
-              </p>
-            )}
-            {selectedEvent.extendedProps.hasTareas && (
-              <p className='my-1'>
-                <strong>Tareas:</strong> {selectedEvent.extendedProps?.tareas}
-              </p>
-            )}
-          </div>
-        )}
-      </OverlayPanel>
+      <DetailPopUp refetch={refetch} ref={detailPopUpRef} />
 
       <OverlayPanelNotas ref={opNotas} refetchNotas={queryNotas.refetch} />
 
