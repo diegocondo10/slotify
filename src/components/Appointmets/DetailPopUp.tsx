@@ -161,7 +161,7 @@ const DetailPopUp = forwardRef<DetailPopUpHandle, DetailPopUpProps>((props, ref)
             <div>
               <Tag
                 style={{
-                  backgroundColor: selectedEvent.backgroundColor,
+                  backgroundColor: selectedEvent.color,
                   color: selectedEvent.textColor,
                 }}>
                 {selectedEvent.estadoLabel}

@@ -1,4 +1,5 @@
 "use client";
+import DetailPopUp, { DetailPopUpHandle } from "@/components/Appointmets/DetailPopUp";
 import Button from "@/components/Buttons/Button";
 import PageTitle from "@/components/pages/PageTitle";
 import MultiSelectFilter from "@/components/Tables/filters/MultiSelectFilter";
@@ -9,11 +10,14 @@ import { CITAS_URLS } from "@/services/citas/citas.urls";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { TagCitaService } from "@/services/citas/tagCita.service";
 import { toBackDate, toFrontDate } from "@/utils/date";
+import { createClickHandler } from "@/utils/events";
 import { downloadReport } from "@/utils/file";
 import { FilterMatchMode, PrimeIcons } from "primereact/api";
 import { Column } from "primereact/column";
+import { DataTableRowClickEvent } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
+import { useRef } from "react";
 import DatePicker from "react-datepicker";
 import { useQuery } from "react-query";
 
@@ -50,8 +54,19 @@ const AppointmentsReportPage = () => {
 
   const queryTags = useQuery(["tags_list_label_value"], () => tagService.listAsLabelValueAll());
   const queryEstados = useQuery(["estados_citas"], () => estadoService.listAsLabelValue(), {});
+
+  const detaulPopupRef = useRef<DetailPopUpHandle>(null);
+
+  const handleOnDoubleClickRow = (event: DataTableRowClickEvent) => {
+    console.log(event);
+    detaulPopupRef.current.toggle(event.data.id, event.originalEvent, event.originalEvent.target);
+  };
+
+  const handleRowClick = createClickHandler(handleOnDoubleClickRow);
+
   return (
     <div className='grid grid-nogutter justify-content-center'>
+      <DetailPopUp refetch={pagination.refetch} ref={detaulPopupRef} />
       <div className='col-12'>
         <PageTitle>Citas</PageTitle>
       </div>
@@ -59,6 +74,7 @@ const AppointmentsReportPage = () => {
       <div className='col-12'>
         <PaginatedTable
           {...pagination.tableProps}
+          onRowClick={handleRowClick}
           paginatorLeft={
             <Button
               icon={PrimeIcons.PRINT}
@@ -75,6 +91,7 @@ const AppointmentsReportPage = () => {
             showClearButton={false}
             filter
             filterField='tag'
+            className='cursor-pointer'
             filterElement={(filterProps) => (
               <MultiSelectFilter
                 filterProps={filterProps}
@@ -87,7 +104,7 @@ const AppointmentsReportPage = () => {
             body={(rowData) => <p className='m-0'>{rowData.titulo}</p>}
           />
           <Column
-            className='text-center w-10rem'
+            className='text-center w-10rem cursor-pointer'
             header='Fecha'
             field='fecha'
             showFilterMenu={false}
@@ -134,7 +151,7 @@ const AppointmentsReportPage = () => {
             body={(rowData) => <p className='m-0 p-0 w-10rem mx-auto'>{rowData.fecha}</p>}
           />
           <Column
-            className='text-center w-10rem'
+            className='text-center w-10rem cursor-pointer'
             header='Pagada'
             body={(rowData) => <p className='p-0 m-0 mx-auto'>{rowData?.isPagada ? "SI" : "NO"}</p>}
             showFilterMenu={false}

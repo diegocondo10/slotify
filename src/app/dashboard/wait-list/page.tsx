@@ -201,7 +201,7 @@ const WaitListPage = () => {
 
           <Column
             header='Prioridad'
-            className='text-center'
+            className='text-center cursor-pointer'
             bodyClassName='m-0'
             body={(rowData) => (
               <div
@@ -214,9 +214,9 @@ const WaitListPage = () => {
               </div>
             )}
           />
-          <Column header='Nombre' field='titulo' />
+          <Column className='cursor-pointer' header='Nombre' field='titulo' />
 
-          <Column header='Descripción' field='descripcion' />
+          <Column className='cursor-pointer' header='Descripción' field='descripcion' />
 
           <Column
             header={<i className={PrimeIcons.TRASH} />}
