@@ -6,8 +6,8 @@ import { CitaService } from "@/services/citas/citas.service";
 import { getTextColorForBackground } from "@/utils/color";
 import { downloadReport } from "@/utils/file";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { endOfMonth, format, startOfMonth } from "date-fns";
-import { map } from "lodash";
+import { endOfMonth, startOfMonth } from "date-fns";
+import { map, sumBy } from "lodash";
 import { PrimeIcons } from "primereact/api";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
@@ -79,6 +79,21 @@ const ReporteGeneralPage = () => {
     return list;
   }, [queryReporteList?.data?.list, selectedEstado]);
 
+  const valueDataTable = useMemo(() => {
+    if (queryReporte?.data) {
+      const value = queryReporte?.data;
+      value.push({
+        backgroundColor: "#000000",
+        color: "#ffffff",
+        label: "Total",
+        cantidad: sumBy(value, "cantidad"),
+      });
+
+      return value;
+    }
+    return [];
+  }, [queryReporte?.data]);
+
   const chartMemo = useMemo(
     () => (
       <Chart
@@ -144,7 +159,7 @@ const ReporteGeneralPage = () => {
               <div className='my-2 col-11 md:col-5 lg:col-4'>{chartMemo}</div>
               <div className='my-2 col-11 md:col-5 lg:col-4 align-content-center'>
                 <DataTable
-                  value={queryReporte?.data}
+                  value={valueDataTable}
                   className='border-1 border-gray-200'
                   stripedRows
                   showGridlines
