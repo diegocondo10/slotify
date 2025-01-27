@@ -10,6 +10,7 @@ import { REQUIRED_MSG } from "@/constants/rules";
 import { CrudActions } from "@/emuns/crudActions";
 import useCreateUpdate from "@/hooks/useCreateUpdate";
 import useToasts from "@/hooks/useToasts";
+import { AuthService } from "@/services/auth/auth.service";
 import { CitaService } from "@/services/citas/citas.service";
 import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { TagCitaService } from "@/services/citas/tagCita.service";
@@ -19,6 +20,7 @@ import classNames from "classnames";
 import { addMonths, setHours, subDays } from "date-fns";
 import { addHours } from "date-fns/addHours";
 import { keyBy } from "lodash";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
@@ -30,7 +32,7 @@ import CreatableSelect from "react-select/creatable";
 const today = new Date();
 
 const tagService = new TagCitaService();
-const citaService = new CitaService();
+const authService = new AuthService();
 const estadoService = new EstadoCitaService();
 
 const CitaPage = ({ searchParams }) => {
@@ -42,6 +44,8 @@ const CitaPage = ({ searchParams }) => {
   const [isCreating, setIsCreating] = useState(false);
 
   const action = searchParams.action;
+  const session = useSession({ required: true });
+  const queryConfigs = useQuery(["configs", session?.data], () => authService.configs());
 
   const isCreate = action === CrudActions.CREATE;
   const isUpdate = action === CrudActions.UPDATE;
@@ -110,7 +114,11 @@ const CitaPage = ({ searchParams }) => {
   });
 
   const isLoading =
-    loading || queryEstados.isFetching || queryClientes.isFetching || mutation.isLoading;
+    loading ||
+    queryEstados.isFetching ||
+    queryClientes.isFetching ||
+    mutation.isLoading ||
+    queryConfigs.isFetching;
 
   const horaInicio = methods.watch("horaInicio");
 
@@ -328,8 +336,10 @@ const CitaPage = ({ searchParams }) => {
                           block
                           datePicker={{
                             placeholderText: "SELECCIONE...",
-                            timeIntervals: 60,
-                            disabled: true,
+                            timeIntervals:
+                              queryConfigs?.data?.citaForm?.horaFinDatePicker?.timeIntervals || 60,
+                            disabled:
+                              queryConfigs?.data?.citaForm?.horaFinDatePicker?.disabled || true,
                           }}
                         />
                       )}
@@ -355,10 +365,14 @@ const CitaPage = ({ searchParams }) => {
                           datePicker={{
                             placeholderText: "SELECCIONE...",
                             disabled: !!!horaInicio,
-                            timeIntervals: 60,
+                            timeIntervals:
+                              queryConfigs?.data?.citaForm?.horaFinDatePicker?.timeIntervals || 60,
                             calendarClassName: "hide-disabled-times",
                             minTime: setHours(today, horaInicio?.getHours()),
-                            maxTime: setHours(today, 22),
+                            maxTime: setHours(
+                              today,
+                              queryConfigs?.data?.citaForm?.horaFinDatePicker?.maxTime || 22
+                            ),
                           }}
                         />
                       )}

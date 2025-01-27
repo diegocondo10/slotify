@@ -18,4 +18,8 @@ export class AuthService extends BaseService<AuthUrls> {
   async perfil() {
     return (await this.privateApi.get(this.urls.perfil)).data;
   }
+
+  async configs() {
+    return (await this.privateApi.get(this.urls.getConfigs)).data;
+  }
 }

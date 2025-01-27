@@ -5,8 +5,8 @@ import Button from "@/components/Buttons/Button";
 import { CrudActions } from "@/emuns/crudActions";
 import useRouteState from "@/hooks/useRouteState";
 import useToasts from "@/hooks/useToasts";
+import { AuthService } from "@/services/auth/auth.service";
 import { CitaService } from "@/services/citas/citas.service";
-import { EstadoCitaService } from "@/services/citas/estadoCita.service";
 import { NotaService } from "@/services/notas/notas.service";
 import { calcularTresDias, formatToTimeString, toBackDate } from "@/utils/date";
 import { isPwaInIOS } from "@/utils/device";
@@ -20,6 +20,7 @@ import timeGridPlugin from "@fullcalendar/timegrid"; // vistas de semana y día
 import classNames from "classnames";
 import { endOfWeek, format, startOfWeek } from "date-fns";
 import { isEqual } from "lodash";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PrimeIcons } from "primereact/api";
@@ -35,8 +36,8 @@ import OverlayPanelNotas from "./components/OverlayPanelNotas";
 import SummaryFooter from "./components/SummaryFooter";
 
 const citaService = new CitaService();
-const estadoService = new EstadoCitaService();
 const notasService = new NotaService();
+const authService = new AuthService();
 
 type SummaryType = Record<
   string,
@@ -65,11 +66,10 @@ const DashboardPage = () => {
 
   const calendarRef = useRef<FullCalendar>(null);
   const getCalendarApi = () => calendarRef.current?.getApi();
-  // const [selectedEvent, setSelectedEvent] = useState<EventImpl>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
 
   const toast = useToasts();
-
+  const session = useSession({ required: true });
   const { routeState, setRouteState, setRouteValue, isInitializing } =
     useRouteState<RouteStateProps>({
       stateKey: "state",
@@ -107,6 +107,8 @@ const DashboardPage = () => {
       },
     }
   );
+
+  const queryConfigs = useQuery(["configs", session?.data], () => authService.configs());
 
   const queryNotas = useQuery<any[]>(
     ["notas", currentRange],
@@ -236,7 +238,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     calcularHeight();
-  }, [isWeekView]);
+  }, [isWeekView, queryConfigs?.data?.showFooter]);
 
   const onDoubleClickDayHeader = (date: string) => () => {
     opNotas.current.hide();
@@ -271,7 +273,7 @@ const DashboardPage = () => {
 
   return (
     <div style={{ height: `${calcHeight}px`, width: "100vw" }}>
-      {queryCitas.isFetching && <CalendarLoader />}
+      {(queryCitas.isFetching || queryConfigs.isFetching) && <CalendarLoader />}
 
       <DetailPopUp refetch={refetch} ref={detailPopUpRef} />
 
@@ -394,11 +396,12 @@ const DashboardPage = () => {
           },
         }}
         allDaySlot={false} // Desactiva el slot de todo el día
-        slotMinTime='05:00:00' // Hora mínima disponible (5:00 AM)
-        slotMaxTime='22:00:00' // Hora máxima disponible (10:00 PM)
-        // slotDuration='00:05:00' // Intervalo de 1 hora entre los slots
-        slotDuration='01:00:00' // Intervalo de 1 hora entre los slots
-        snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
+        {...queryConfigs?.data?.calendar}
+        // slotMinTime='05:00:00' // Hora mínima disponible (5:00 AM)
+        // slotMaxTime='22:00:00' // Hora máxima disponible (10:00 PM)
+        // // slotDuration='00:05:00' // Intervalo de 1 hora entre los slots
+        // slotDuration='01:00:00' // Intervalo de 1 hora entre los slots
+        // snapDuration='01:00:00' // Asegura que los eventos se muevan en intervalos de 1 hora
         slotLabelFormat={{
           hour: "numeric",
           minute: "2-digit",
@@ -421,7 +424,9 @@ const DashboardPage = () => {
         dragScroll={false} // Permite que la vista se desplace mientras arrastras un evento
         lazyFetching
       />
-      {isWeekView && <SummaryFooter summary={summary} hiddenDays={hiddenDays} />}
+      {queryConfigs?.data?.showFooter && isWeekView && (
+        <SummaryFooter summary={summary} hiddenDays={hiddenDays} />
+      )}
     </div>
   );
 };

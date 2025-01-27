@@ -38,3 +38,4 @@ public/sw.js
 public/sw.js.map
 # Turborepo
 .turbo
+.codegpt/
